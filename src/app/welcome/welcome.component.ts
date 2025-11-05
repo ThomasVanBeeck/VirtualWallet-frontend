@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { UserService, UserData } from '../services/user.service';
-import { MarketDataService } from '../market-data.service';
+import { Component, inject, OnInit } from '@angular/core';
+import { AuthService } from '../services/auth.service';
+import { MarketDataService } from '../services/market-data.service';
+import { UserModel } from '../models/usermodel';
 
 @Component({
   selector: 'app-welcome',
@@ -12,7 +13,8 @@ export class WelcomeComponent implements OnInit {
   public classname: string = "unchanged"
   public classtoggle: boolean = false
 
-  constructor(private userService: UserService, private marketDataService: MarketDataService) { }
+  authService = inject(AuthService)
+  marketDataService = inject(MarketDataService)
 
   ngOnInit(): void {
     this.fetchUsername();
@@ -26,8 +28,8 @@ export class WelcomeComponent implements OnInit {
   }
 
   fetchUsername(): void {
-    this.userService.getUserData().subscribe({
-      next: (data: UserData) => {
+    this.authService.getCurrentUser().subscribe({
+      next: (data: UserModel) => {
         this.username = data.username;
       },
       error: (err) => {

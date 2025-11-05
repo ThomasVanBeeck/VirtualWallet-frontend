@@ -1,10 +1,30 @@
 <h1>Login</h1>
-<form>
-    <p class="form-footer">
+<form (ngSubmit)="login()" [formGroup]="loginForm">
+  <p class="form-footer">
   Don't have an account? 
   <a href routerLink="/register">Register</a>
+  </p>
+  <p>
+<label>Username</label>
+@if (usernameCtrl.dirty && usernameCtrl.hasError('required')) {
+  <label class="red-alert form-footer">*username required</label>
+}
+<!-- 
+  @if (usernameCtrl.hasError('minlength')) { 
+    <label class="red-alert form-footer">*username is too short</label>
+  }
+  @if (usernameCtrl.hasError('maxlength')) {
+    <label class="red-alert form-footer">*username is too long</label>
+  }
+ -->
+  </p>
+  <input formControlName="username" />
+<p><label>Password</label>
+@if (passwordCtrl.dirty && passwordCtrl.hasError('required')) {
+  <label class="red-alert form-footer">*password required</label>
+}
 </p>
-        <label>Username</label><input type="text">
-        <label>Password</label><input type="password">
-        <button>Login</button>
+
+  <input formControlName="password" type="password">
+  <button type="submit" [disabled]="loginForm.invalid">Login</button>
 </form>
