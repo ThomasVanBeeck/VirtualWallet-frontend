@@ -40,7 +40,7 @@ login(): void {
   this.authService.login(username, password).subscribe({
     next: () => {
       console.log("login ok")
-          this.router.navigate(['/app/welcome'])
+      this.router.navigate(['/app/welcome'])
     },
     error: err => console.error("login failed", err)
   });

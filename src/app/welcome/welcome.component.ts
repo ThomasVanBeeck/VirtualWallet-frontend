@@ -2,11 +2,13 @@ import { Component, inject, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { MarketDataService } from '../services/market-data.service';
 import { UserModel } from '../models/usermodel';
+import { TopbarComponent } from "../topbar/topbar.component";
 
 @Component({
   selector: 'app-welcome',
   templateUrl: './welcome.component.html',
-  styleUrls: ['./welcome.component.css']
+  styleUrls: ['./welcome.component.css'],
+  imports: [TopbarComponent]
 })
 export class WelcomeComponent implements OnInit {
   public username: string = 'gast';

@@ -13,7 +13,7 @@ export class AuthService {
   http = inject(HttpClient)
 
   private apiUrl = environment.apiUrl
-  isMockLoggedIn: boolean = false
+  isMockLoggedIn: boolean = true
 
   private mockUser: UserModel = {
     username: 'Thomas Van Beeck',
@@ -35,7 +35,21 @@ export class AuthService {
     else
       return this.http.post<void>(`${this.apiUrl}/auth/login`,
         { username, password },
-        { withCredentials: true})
+        { withCredentials: true }
+      )
+  }
+
+  public logout(): Observable<void> {
+    if (environment.mockApi) {
+      console.log("mock logout")
+      this.isMockLoggedIn = false
+      return of (undefined)
+    }
+    else
+      return this.http.post<void>(`${this.apiUrl}/auth/logout`,
+        {},
+        { withCredentials: true }
+      )
   }
 
 public getCurrentUser(): Observable<UserModel> {

@@ -24,8 +24,8 @@ export const routes: Routes = [
         canActivateChild: [childrenGuard],
         children: [
             { path: 'welcome', loadComponent: () => import('./welcome/welcome.component').then(m => m.WelcomeComponent) },
-            { path: 'transactions', loadComponent: () => import('./market/market.component').then(m => m.MarketComponent) },
             { path: 'wallet', loadComponent: () => import('./wallet/wallet.component').then(m => m.WalletComponent) },
+            { path: 'market', loadComponent: () => import('./market/market.component').then(m => m.MarketComponent) },
             { path: 'orders', loadComponent: () => import('./orders/orders.component').then(m =>m.OrdersComponent)},
             { path: '', redirectTo: 'welcome', pathMatch: 'full' },
             { path: '**', redirectTo: ''}
