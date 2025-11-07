@@ -52,19 +52,33 @@ export class AuthService {
       )
   }
 
-public getCurrentUser(): Observable<UserModel> {
-  if (environment.mockApi) {
-    console.log("mock getCurrentUser");
-    if (this.isMockLoggedIn) {
-      return of(this.mockUser);
+  public getCurrentUser(): Observable<UserModel> {
+    if (environment.mockApi) {
+      console.log("mock getCurrentUser");
+      if (this.isMockLoggedIn) {
+        return of(this.mockUser);
+      }
+      return throwError(() => ({ status: 401 }))
     }
-    return throwError(() => ({ status: 401 }))
+
+    return this.http.get<UserModel>(
+      `${this.apiUrl}/auth/currentuser`,
+      { withCredentials: true }
+    );
   }
 
-  return this.http.get<UserModel>(
-    `${this.apiUrl}/auth/me`,
-    { withCredentials: true }
-  );
-}
+    public getTestUser(): Observable<UserModel> {
+    if (environment.mockApi) {
+      console.log("mock getTestUser");
+      if (this.isMockLoggedIn) {
+        return of(this.mockUser);
+      }
+      return throwError(() => ({ status: 401 }))
+    }
 
+    return this.http.get<UserModel>(
+      `${this.apiUrl}/User/testuser`,
+      { withCredentials: true }
+    );
+  }
 }

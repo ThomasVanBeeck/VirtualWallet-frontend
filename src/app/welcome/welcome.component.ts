@@ -30,7 +30,7 @@ export class WelcomeComponent implements OnInit {
   }
 
   fetchUsername(): void {
-    this.authService.getCurrentUser().subscribe({
+    this.authService.getTestUser().subscribe({
       next: (data: UserModel) => {
         this.username = data.username;
       },
@@ -40,4 +40,17 @@ export class WelcomeComponent implements OnInit {
       }
     });
   }
+
+
+  // fetchUsername(): void {
+  //   this.authService.getCurrentUser().subscribe({
+  //     next: (data: UserModel) => {
+  //       this.username = data.username;
+  //     },
+  //     error: (err) => {
+  //       console.error('Fout bij ophalen gebruikersnaam:', err);
+  //       this.username = 'gebruiker (fout)';
+  //     }
+  //   });
+  // }
 }
