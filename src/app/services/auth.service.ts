@@ -62,7 +62,7 @@ export class AuthService {
     }
 
     return this.http.get<UserModel>(
-      `${this.apiUrl}/auth/currentuser`,
+      `${this.apiUrl}/user/current-user`,
       { withCredentials: true }
     );
   }
@@ -77,7 +77,7 @@ export class AuthService {
     }
 
     return this.http.get<UserModel>(
-      `${this.apiUrl}/User/testuser`,
+      `${this.apiUrl}/user/testuser`,
       { withCredentials: true }
     );
   }
