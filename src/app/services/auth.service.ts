@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { environment } from '../../environments/environment'
-import { UserModel } from '../models/usermodel';
+import { UserDTO, UserLoginDTO } from '../DTOs/UserDTOs';
 
 
 @Injectable({
@@ -13,18 +13,30 @@ export class AuthService {
   http = inject(HttpClient)
 
   private apiUrl = environment.apiUrl
-  isMockLoggedIn: boolean = true
+  public isMockLoggedIn: boolean = false
 
-  private mockUser: UserModel = {
-    username: 'Thomas Van Beeck',
+  public mockUser: UserDTO = {
+    username: 'ThomasVanBeeck',
+    firstName: 'Thomas',
+    lastName: 'Van Beeck',
+    email: 'thomas@vanbeeck.be',
     password: 'Test1234Test!'
   }
 
-  public login(username: string, password: string): Observable<void> {
+  public mockNewUsers: Array<UserDTO> = [this.mockUser]
+  public currentMockUser: UserDTO | null = null
+
+  public login(userLoginDTO: UserLoginDTO): Observable<void> {
     if (environment.mockApi) {
       console.log("mock login")
-      if (username === this.mockUser.username && password === this.mockUser.password) {
-        this.isMockLoggedIn = true        
+
+      const loginUser = this.mockNewUsers.find(
+        user => user.username === userLoginDTO.username &&
+      user.password === userLoginDTO.password)
+
+      if (loginUser) {
+        this.isMockLoggedIn = true  
+        this.currentMockUser = loginUser
         return of(undefined)
       }
       return throwError(() => ({
@@ -34,7 +46,7 @@ export class AuthService {
     }
     else
       return this.http.post<void>(`${this.apiUrl}/auth/login`,
-        { username, password },
+        userLoginDTO,
         { withCredentials: true }
       )
   }
@@ -43,6 +55,7 @@ export class AuthService {
     if (environment.mockApi) {
       console.log("mock logout")
       this.isMockLoggedIn = false
+      this.currentMockUser = null
       return of (undefined)
     }
     else
@@ -52,32 +65,17 @@ export class AuthService {
       )
   }
 
-  public getCurrentUser(): Observable<UserModel> {
+  public getCurrentUser(): Observable<UserDTO> {
     if (environment.mockApi) {
       console.log("mock getCurrentUser");
-      if (this.isMockLoggedIn) {
-        return of(this.mockUser);
+      if (this.isMockLoggedIn && this.currentMockUser) {
+        return of(this.currentMockUser);
       }
       return throwError(() => ({ status: 401 }))
     }
 
-    return this.http.get<UserModel>(
+    return this.http.get<UserDTO>(
       `${this.apiUrl}/user/current-user`,
-      { withCredentials: true }
-    );
-  }
-
-    public getTestUser(): Observable<UserModel> {
-    if (environment.mockApi) {
-      console.log("mock getTestUser");
-      if (this.isMockLoggedIn) {
-        return of(this.mockUser);
-      }
-      return throwError(() => ({ status: 401 }))
-    }
-
-    return this.http.get<UserModel>(
-      `${this.apiUrl}/user/testuser`,
       { withCredentials: true }
     );
   }

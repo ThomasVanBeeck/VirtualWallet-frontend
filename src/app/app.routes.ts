@@ -5,10 +5,12 @@ import { MainlayoutComponent } from './mainlayout/mainlayout.component';
 import { authGuard } from './guards/auth.guard';
 import { childrenGuard } from './guards/children.guard';
 import { AuthlayoutComponent } from './authlayout/authlayout.component';
+import { loggedinGuard } from './guards/loggedin.guard';
 
 export const routes: Routes = [
     {
         path: '', component: AuthlayoutComponent,
+        canActivate: [loggedinGuard],
         children: [
             { path: 'register', loadComponent: () => import('./register/register.component').then(m => m.RegisterComponent) },
             { path: 'login', loadComponent: () => import('./login/login.component').then(m => m.LoginComponent) },

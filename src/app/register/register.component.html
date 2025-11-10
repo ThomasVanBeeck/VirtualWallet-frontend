@@ -1,2 +1,94 @@
-<p>register works!</p>
-<p class="form-footer">Already registered? <a routerLink="/login">Login</a></p>
+<h1>Register</h1>
+@if (!isRegistered) {
+<form (ngSubmit)="register()" [formGroup]="registerForm">
+    <p class="form-footer">
+    Already registered?
+    <a href routerLink="/login">Login</a>
+    </p>
+
+        <p>
+            <label>Username</label>
+            @if ((usernameCtrl.dirty || usernameCtrl.touched) && usernameCtrl.hasError('required')) {
+                <label class="red-alert form-footer">*username required</label>
+            } @else {
+                @if (usernameCtrl.hasError('minlength')) { 
+                    <label class="red-alert form-footer">*username is too short</label>
+                }
+                @if (usernameCtrl.hasError('maxlength')) {
+                    <label class="red-alert form-footer">*username is too long</label>
+                }
+                @if (usernameCtrl.hasError('usernameTaken')) {
+                    <label class="red-alert form-footer">*username already exists</label>
+                }
+            }
+        </p>
+        <input formControlName="username" />
+        <p>
+            <label>First Name</label>
+            @if ((firstNameCtrl.dirty || firstNameCtrl.touched) && firstNameCtrl.hasError('required')) {
+                <label class="red-alert form-footer">*first name required</label>
+            } @else {
+                @if (firstNameCtrl.hasError('maxlength')) {
+                    <label class="red-alert form-footer">*first name is too long</label>
+                }
+            }
+        </p>
+        <input formControlName="firstName"/>
+        <p>
+            <label>Last Name</label>
+            @if ((lastNameCtrl.dirty || lastNameCtrl.touched) &&  lastNameCtrl.hasError('required')) {
+                <label class="red-alert form-footer">*last name required</label>
+            } @else {
+                @if (lastNameCtrl.hasError('maxlength')) {
+                    <label class="red-alert form-footer">*last name is too long</label>
+                }
+            }
+        </p>
+        <input formControlName="lastName"/>
+        <p>
+            <label>Email Address</label>
+            @if ((emailCtrl.dirty || emailCtrl.touched) && emailCtrl.hasError('required')) {
+                <label class="red-alert form-footer">*address required</label>
+            } @else {
+                @if (emailCtrl.hasError('email')) { 
+                    <label class="red-alert form-footer">*address should be valid</label>
+                }
+                @if (emailCtrl.hasError('maxlength')) {
+                    <label class="red-alert form-footer">*address is too long</label>
+                }
+            }
+        </p>
+        <input formControlName="email" />
+        <p><label>Password</label>
+            @if ((passwordCtrl.dirty || passwordCtrl.touched) && passwordCtrl.hasError('required')) {
+                <label class="red-alert form-footer">*password required</label>
+            } @else {
+                @if (passwordCtrl.hasError('minlength')) {
+                    <label class="red-alert form-footer">*password is too short</label>
+                }
+                @if (passwordCtrl.hasError('maxlength')) {
+                    <label class="red-alert form-footer">*password is too long</label>
+                }
+            }
+        </p>
+        <input formControlName="password" type="password">
+                <p><label>Repeat Password</label>
+            @if ((passwordRepeatCtrl.dirty || passwordRepeatCtrl.touched) && passwordRepeatCtrl.hasError('required')) {
+                <label class="red-alert form-footer">*password required</label>
+            } @else {
+                @if (passwordRepeatCtrl.hasError('notEquivalent')) {
+                    <label class="red-alert form-footer">*password not equal</label>
+                }
+            }
+        </p>
+        <input formControlName="passwordRepeat" type="password">
+        <button type="submit">Register</button>
+        <label class="form-footer">{{registerStatus()}}</label>
+    </form>
+    }
+    @else {
+        <p class="form-footer">
+            Successfully registered!
+    <a href routerLink="/login">Login</a>
+    </p>
+    }

@@ -44,6 +44,7 @@ a {
 
 h1 {
     font-size: 1.88rem;
+    margin: 0rem;
 }
 
 h2 {
@@ -53,9 +54,10 @@ h2 {
 body {
     margin: 0rem;
     padding: 0rem;
+    height: auto;
 }
 
-html, body {
+html {
   height: 100%;
 }
 
@@ -96,7 +98,7 @@ html, body {
 .form-footer {
     font-size: 0.9rem;
     font-weight: 400;
-    margin: 1.2rem 0rem;
+    margin: 0.6rem 0rem;
 }
 
 .red-alert {

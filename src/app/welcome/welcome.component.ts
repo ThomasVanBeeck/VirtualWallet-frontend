@@ -1,22 +1,24 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { MarketDataService } from '../services/market-data.service';
-import { UserModel } from '../models/usermodel';
-import { TopbarComponent } from "../topbar/topbar.component";
+import { UserDTO } from '../DTOs/UserDTOs';
+import { Router } from '@angular/router';
+import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-welcome',
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.css'],
-  imports: [TopbarComponent]
+  imports: []
 })
 export class WelcomeComponent implements OnInit {
   public username: string = 'gast';
   public classname: string = "unchanged"
   public classtoggle: boolean = false
 
-  authService = inject(AuthService)
+  userService = inject(UserService)
   marketDataService = inject(MarketDataService)
+  router = inject(Router)
 
   ngOnInit(): void {
     this.fetchUsername();
@@ -30,27 +32,15 @@ export class WelcomeComponent implements OnInit {
   }
 
   fetchUsername(): void {
-    this.authService.getTestUser().subscribe({
-      next: (data: UserModel) => {
+    this.userService.getCurrentUser().subscribe({
+      next: (data: UserDTO) => {
         this.username = data.username;
       },
       error: (err) => {
         console.error('Fout bij ophalen gebruikersnaam:', err);
         this.username = 'gebruiker (fout)';
+        this.router.navigate(['login'])
       }
     });
   }
-
-
-  // fetchUsername(): void {
-  //   this.authService.getCurrentUser().subscribe({
-  //     next: (data: UserModel) => {
-  //       this.username = data.username;
-  //     },
-  //     error: (err) => {
-  //       console.error('Fout bij ophalen gebruikersnaam:', err);
-  //       this.username = 'gebruiker (fout)';
-  //     }
-  //   });
-  // }
 }
