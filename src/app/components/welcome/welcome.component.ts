@@ -1,9 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { AuthService } from '../services/auth.service';
-import { MarketDataService } from '../services/market-data.service';
-import { UserDTO } from '../DTOs/UserDTOs';
+import { AuthService } from '../../services/auth.service';
+import { MarketDataService } from '../../services/market-data.service';
+import { UserRegisterDTO } from '../../DTOs/UserDTOs';
 import { Router } from '@angular/router';
-import { UserService } from '../services/user.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-welcome',
@@ -33,7 +33,7 @@ export class WelcomeComponent implements OnInit {
 
   fetchUsername(): void {
     this.userService.getCurrentUser().subscribe({
-      next: (data: UserDTO) => {
+      next: (data: UserRegisterDTO) => {
         this.username = data.username;
       },
       error: (err) => {

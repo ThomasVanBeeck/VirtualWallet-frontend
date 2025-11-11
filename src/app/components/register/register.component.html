@@ -83,7 +83,8 @@
         </p>
         <input formControlName="passwordRepeat" type="password">
         <button type="submit">Register</button>
-        <label class="form-footer">{{registerStatus()}}</label>
+        <label class="form-footer" [class]="registerStatus() === 'Connecting...' ? 'white-text' : 'red-alert-no-margin'">
+            {{registerStatus()}}</label>
     </form>
     }
     @else {

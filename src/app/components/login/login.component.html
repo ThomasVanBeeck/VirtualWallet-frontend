@@ -27,4 +27,6 @@
 
   <input formControlName="password" type="password">
   <button type="submit" [disabled]="loginForm.invalid">Login</button>
+  <label  class="form-footer" [class]="loginStatus() === 'Connecting...' ? 'white-text' : 'red-alert-no-margin'">
+    {{loginStatus()}}</label>
 </form>

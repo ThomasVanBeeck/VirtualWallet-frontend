@@ -1,10 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, RouterModule } from "@angular/router";
-import { UserService } from '../services/user.service';
-import { environment } from '../../environments/environment';
-import { UserDTO } from '../DTOs/UserDTOs';
-import { validateEquivalent } from '../validators/equivalent.validator';
+import { UserService } from '../../services/user.service';
+import { environment } from '../../../environments/environment';
+import { UserRegisterDTO } from '../../DTOs/UserDTOs';
+import { validateEquivalent } from '../../validators/equivalent.validator';
 
 @Component({
   selector: 'app-register',
@@ -36,13 +36,14 @@ export class RegisterComponent {
     { validators: [validateEquivalent("password", "passwordRepeat")] })
 
   register(): void {
+    this.registerStatus.set('Connecting...')
     console.log("register called")
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched()
       return
     }
 
-    const userDTO: UserDTO = {
+    const userDTO: UserRegisterDTO = {
       username: this.usernameCtrl.value!.toString(),
       firstName: this.firstNameCtrl.value!.toString(),
       lastName: this.lastNameCtrl.value!.toString(),
@@ -58,13 +59,12 @@ export class RegisterComponent {
     this.userService.registerNewUser(userDTO).subscribe({
       next: () => {
         console.log("registering succeeded")
-        this.registerStatus.set("Successfully registered!")
+        this.registerStatus.set('')
         this.isRegistered = true
       },
       error: (err: any) => {
         console.error("registering failed", err)
-        this.registerStatus.set(err.error)
-        console.error("boohoo", err)
+        this.registerStatus.set("Registering failed.")
       } 
     })
   }

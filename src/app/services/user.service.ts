@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
-import { UserDTO } from '../DTOs/UserDTOs';
+import { UserRegisterDTO as UserDTO, UserRegisterDTO } from '../DTOs/UserDTOs';
 import { AbstractControl, AsyncValidatorFn } from '@angular/forms';
 
 @Injectable({
@@ -31,31 +31,31 @@ export class UserService {
     );
   }
 
-  public registerNewUser(userDTO: UserDTO): Observable<void> { 
+  public registerNewUser(userRegisterDTO: UserRegisterDTO): Observable<void> { 
     
     if (environment.mockApi) {
       console.log("Mock: registerNewUser called")
       
       const existingUser = this.authService.mockNewUsers.find(
-        user => user.username === userDTO.username
+        user => user.username === userRegisterDTO.username
       );
 
       if (existingUser) {
-        console.error(`Mock: User '${userDTO.username}' already exists.`)
+        console.error(`Mock: User '${userRegisterDTO.username}' already exists.`)
         return throwError(() => ({ 
           status: 409, 
           error: "Username already taken" 
         }))
       }
 
-      this.authService.mockNewUsers.push(userDTO);
-      console.log(`Mock: New User '${userDTO.username}' registered.`)
+      this.authService.mockNewUsers.push(userRegisterDTO);
+      console.log(`Mock: New User '${userRegisterDTO.username}' registered.`)
       return of(undefined)
     }
     
     return this.http.post<void>(
-      `${this.apiUrl}/user/register-new-user`,
-      userDTO,
+      `${this.apiUrl}/user/create-user`,
+      userRegisterDTO,
       { withCredentials: true }
     )
   }

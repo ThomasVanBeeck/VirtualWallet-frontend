@@ -5,6 +5,7 @@
     --primary-text: white;
     --tint-text: #33ce92;
     --menu-height: 3rem;
+    --alert-text: rgb(190, 6, 6);
 }
 
 @font-face {
@@ -61,6 +62,10 @@ html {
   height: 100%;
 }
 
+.white-text {
+  color: white;
+}
+
 .main-component {
     min-height: 100%;
     background-color: var(--background-light);
@@ -102,8 +107,12 @@ html {
 }
 
 .red-alert {
-  color: rgb(190, 6, 6);
+  color: var(--alert-text);
   margin-left: 1rem;
+}
+
+.red-alert-no-margin {
+  color: var(--alert-text);
 }
 
   form > *{

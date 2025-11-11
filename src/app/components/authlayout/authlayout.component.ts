@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { UserService } from '../services/user.service';
-import { UserDTO } from '../DTOs/UserDTOs';
+import { UserService } from '../../services/user.service';
+import { UserRegisterDTO } from '../../DTOs/UserDTOs';
 
 @Component({
   selector: 'app-authlayout',
@@ -19,7 +19,7 @@ export class AuthlayoutComponent implements OnInit {
 
   checkIfLoggedIn(): void {
       this.userService.getCurrentUser().subscribe({
-        next: (data: UserDTO) => {
+        next: (data: UserRegisterDTO) => {
           if (data !== null) this.router.navigate(['welcome'])
         },
         error: (err) => {

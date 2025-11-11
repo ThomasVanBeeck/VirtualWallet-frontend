@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { environment } from '../../environments/environment'
-import { UserDTO, UserLoginDTO } from '../DTOs/UserDTOs';
+import { UserRegisterDTO, UserLoginDTO } from '../DTOs/UserDTOs';
 
 
 @Injectable({
@@ -15,7 +15,7 @@ export class AuthService {
   private apiUrl = environment.apiUrl
   public isMockLoggedIn: boolean = false
 
-  public mockUser: UserDTO = {
+  public mockUser: UserRegisterDTO = {
     username: 'ThomasVanBeeck',
     firstName: 'Thomas',
     lastName: 'Van Beeck',
@@ -23,8 +23,8 @@ export class AuthService {
     password: 'Test1234Test!'
   }
 
-  public mockNewUsers: Array<UserDTO> = [this.mockUser]
-  public currentMockUser: UserDTO | null = null
+  public mockNewUsers: Array<UserRegisterDTO> = [this.mockUser]
+  public currentMockUser: UserRegisterDTO | null = null
 
   public login(userLoginDTO: UserLoginDTO): Observable<void> {
     if (environment.mockApi) {
@@ -65,7 +65,7 @@ export class AuthService {
       )
   }
 
-  public getCurrentUser(): Observable<UserDTO> {
+  public getCurrentUser(): Observable<UserRegisterDTO> {
     if (environment.mockApi) {
       console.log("mock getCurrentUser");
       if (this.isMockLoggedIn && this.currentMockUser) {
@@ -74,7 +74,7 @@ export class AuthService {
       return throwError(() => ({ status: 401 }))
     }
 
-    return this.http.get<UserDTO>(
+    return this.http.get<UserRegisterDTO>(
       `${this.apiUrl}/user/current-user`,
       { withCredentials: true }
     );
