@@ -36,12 +36,13 @@ export class RegisterComponent {
     { validators: [validateEquivalent("password", "passwordRepeat")] })
 
   register(): void {
-    this.registerStatus.set('Connecting...')
     console.log("register called")
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched()
       return
     }
+    
+    this.registerStatus.set('Connecting...')
 
     const userDTO: UserRegisterDTO = {
       username: this.usernameCtrl.value!.toString(),

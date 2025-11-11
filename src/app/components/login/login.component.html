@@ -9,14 +9,6 @@
 @if (usernameCtrl.dirty && usernameCtrl.hasError('required')) {
   <label class="red-alert form-footer">*username required</label>
 }
-<!-- 
-  @if (usernameCtrl.hasError('minlength')) { 
-    <label class="red-alert form-footer">*username is too short</label>
-  }
-  @if (usernameCtrl.hasError('maxlength')) {
-    <label class="red-alert form-footer">*username is too long</label>
-  }
- -->
   </p>
   <input formControlName="username" />
 <p><label>Password</label>

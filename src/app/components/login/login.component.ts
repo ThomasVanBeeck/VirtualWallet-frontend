@@ -25,13 +25,13 @@ export class LoginComponent {
   })
 
   login(): void {
-    this.loginStatus.set("Connecting...")
-    console.log("login called")
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
-
+    
+    this.loginStatus.set("Connecting...")
+    
     const userLoginDTO: UserLoginDTO = {
     username: this.usernameCtrl.value!.toString(),
     password: this.passwordCtrl.value!.toString()
@@ -39,12 +39,10 @@ export class LoginComponent {
 
     if (environment.mockApi) {
       console.log("mock login attempt", { userLoginDTO });
-      // AuthService also handles mock login logic
     }
 
     this.authService.login(userLoginDTO).subscribe({
       next: () => {
-        console.log("login ok")
         this.router.navigate(['/app/welcome'])
         this.loginStatus.set("")
       },
