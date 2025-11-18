@@ -1,19 +1,19 @@
 export interface UserDTO {
-    username: string,
-    firstName: string,
-    lastName: string,
-    email: string    
+    Username: string,
+    FirstName: string,
+    LastName: string,
+    Email: string    
 }
 
 export interface UserLoginDTO {
-    username: string,
-    password: string
+    Username: string,
+    Password: string
 }
 
 export interface UserRegisterDTO {
-    username: string,
-    firstName: string,
-    lastName: string,
-    email: string,
-    password: string
+    Username: string,
+    FirstName: string,
+    LastName: string,
+    Email: string,
+    Password: string
 }

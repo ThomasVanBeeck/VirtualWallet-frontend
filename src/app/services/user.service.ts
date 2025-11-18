@@ -37,11 +37,11 @@ export class UserService {
       console.log("Mock: registerNewUser called")
       
       const existingUser = this.authService.mockNewUsers.find(
-        user => user.username === userRegisterDTO.username
+        user => user.Username === userRegisterDTO.Username
       );
 
       if (existingUser) {
-        console.error(`Mock: User '${userRegisterDTO.username}' already exists.`)
+        console.error(`Mock: User '${userRegisterDTO.Username}' already exists.`)
         return throwError(() => ({ 
           status: 409, 
           error: "Username already taken" 
@@ -49,7 +49,7 @@ export class UserService {
       }
 
       this.authService.mockNewUsers.push(userRegisterDTO);
-      console.log(`Mock: New User '${userRegisterDTO.username}' registered.`)
+      console.log(`Mock: New User '${userRegisterDTO.Username}' registered.`)
       return of(undefined)
     }
     
@@ -65,7 +65,7 @@ export class UserService {
       console.log("Mock: usernameExists called")
       
       const existingUser = this.authService.mockNewUsers.some(
-        user => user.username === username);
+        user => user.Username === username);
       return of (existingUser)
     }
 

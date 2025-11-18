@@ -1,9 +1,10 @@
 export interface StockModel {
-    stockname: string;
+    stockName: string;
     type: string;
-    price_per_share: number;
-    change_pct_24hr: number;
-    pct_of_wallet: number;
-    shares_amount: number;
-    investment_amount: number;
+    description: string;
+    pricePerShare: number;
+    changePct24Hr: number;
+    pctOfWallet?: number;
+    sharesAmount?: number;
+    investmentAmount?: number;
 }

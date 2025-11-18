@@ -34,7 +34,7 @@ export class WelcomeComponent implements OnInit {
   fetchUsername(): void {
     this.userService.getCurrentUser().subscribe({
       next: (data: UserRegisterDTO) => {
-        this.username = data.username;
+        this.username = data.Username;
       },
       error: (err) => {
         console.error('Fout bij ophalen gebruikersnaam:', err);

@@ -1,11 +1,14 @@
 :root {
     --background-dark: #23352e;
     --background-mid: #394f63;
+    --background-midlight: #698379;
     --background-light: #7a9188;
     --primary-text: white;
     --tint-text: #33ce92;
     --menu-height: 3rem;
     --alert-text: rgb(190, 6, 6);
+    --negative-red: rgb(124, 26, 29);
+    --positive-green: rgb(28, 99, 30);
 }
 
 @font-face {
@@ -66,6 +69,45 @@ html {
   color: white;
 }
 
+table {
+  color: var(--background-dark);
+  padding: 0.2rem;
+  width: 100%;
+  margin: 1rem auto;
+  border-collapse: collapse;
+}
+
+td, th {
+  padding: 0.6rem 0.3rem;
+  white-space: nowrap;
+}
+
+.align-left {
+  text-align: left;
+}
+
+.align-right {
+  text-align: right;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--background-mid);
+  transition: background-color 150ms ease-in-out;;
+}
+
+.font-bold {
+  font-weight: bolder;
+}
+
+tbody tr:hover {
+  background-color: #617a91;
+}
+
+thead {
+  font-size: 1.1rem;
+  border-bottom: 2px solid var(--background-mid)
+}
+
 .main-component {
     min-height: 100%;
     background-color: var(--background-light);
@@ -104,6 +146,14 @@ html {
     font-size: 0.9rem;
     font-weight: 400;
     margin: 0.6rem 0rem;
+}
+
+.red-stock {
+  color: var(--negative-red);
+}
+
+.green-stock {
+  color: var(--positive-green);
 }
 
 .red-alert {
@@ -157,8 +207,6 @@ html {
     color: white;
     margin: 0rem auto;
     width: 768px;
-    border-left: 1px solid var(--background-mid);
-    border-right: 1px solid var(--background-mid);
   }
 
     .auth-component {

@@ -45,11 +45,11 @@ export class RegisterComponent {
     this.registerStatus.set('Connecting...')
 
     const userDTO: UserRegisterDTO = {
-      username: this.usernameCtrl.value!.toString(),
-      firstName: this.firstNameCtrl.value!.toString(),
-      lastName: this.lastNameCtrl.value!.toString(),
-      email: this.emailCtrl.value!.toString(),
-      password: this.passwordCtrl.value!.toString()
+      Username: this.usernameCtrl.value!.toString(),
+      FirstName: this.firstNameCtrl.value!.toString(),
+      LastName: this.lastNameCtrl.value!.toString(),
+      Email: this.emailCtrl.value!.toString(),
+      Password: this.passwordCtrl.value!.toString()
     }
 
     if (environment.mockApi) {

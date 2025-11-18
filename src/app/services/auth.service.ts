@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { environment } from '../../environments/environment'
 import { UserRegisterDTO, UserLoginDTO } from '../DTOs/UserDTOs';
+import { SessionstorageService } from './sessionstorage.service';
 
 
 @Injectable({
@@ -11,16 +12,17 @@ import { UserRegisterDTO, UserLoginDTO } from '../DTOs/UserDTOs';
   
 export class AuthService {
   http = inject(HttpClient)
+  sessionstorage = inject(SessionstorageService)
 
   private apiUrl = environment.apiUrl
   public isMockLoggedIn: boolean = false
 
   public mockUser: UserRegisterDTO = {
-    username: 'ThomasVanBeeck',
-    firstName: 'Thomas',
-    lastName: 'Van Beeck',
-    email: 'thomas@vanbeeck.be',
-    password: 'Test1234Test!'
+    Username: 'ThomasVanBeeck',
+    FirstName: 'Thomas',
+    LastName: 'Van Beeck',
+    Email: 'thomas@vanbeeck.be',
+    Password: 'Test1234Test!'
   }
 
   public mockNewUsers: Array<UserRegisterDTO> = [this.mockUser]
@@ -31,8 +33,8 @@ export class AuthService {
       console.log("mock login")
 
       const loginUser = this.mockNewUsers.find(
-        user => user.username === userLoginDTO.username &&
-      user.password === userLoginDTO.password)
+        user => user.Username === userLoginDTO.Username &&
+      user.Password === userLoginDTO.Password)
 
       if (loginUser) {
         this.isMockLoggedIn = true  
@@ -56,13 +58,16 @@ export class AuthService {
       console.log("mock logout")
       this.isMockLoggedIn = false
       this.currentMockUser = null
+      this.sessionstorage.clearAllItems()
       return of (undefined)
     }
-    else
+    else {
+      this.sessionstorage.clearAllItems()
       return this.http.post<void>(`${this.apiUrl}/auth/logout`,
         {},
         { withCredentials: true }
       )
+    }
   }
 
   public getCurrentUser(): Observable<UserRegisterDTO> {

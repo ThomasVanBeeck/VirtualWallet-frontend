@@ -33,8 +33,8 @@ export class LoginComponent {
     this.loginStatus.set("Connecting...")
     
     const userLoginDTO: UserLoginDTO = {
-    username: this.usernameCtrl.value!.toString(),
-    password: this.passwordCtrl.value!.toString()
+    Username: this.usernameCtrl.value!.toString(),
+    Password: this.passwordCtrl.value!.toString()
     }
 
     if (environment.mockApi) {
