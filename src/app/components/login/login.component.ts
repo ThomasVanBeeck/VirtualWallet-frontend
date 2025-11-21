@@ -33,8 +33,8 @@ export class LoginComponent {
     this.loginStatus.set("Connecting...")
     
     const userLoginDTO: UserLoginDTO = {
-    Username: this.usernameCtrl.value!.toString(),
-    Password: this.passwordCtrl.value!.toString()
+      Username: this.usernameCtrl.value!.toString(),
+      Password: this.passwordCtrl.value!.toString()
     }
 
     if (environment.mockApi) {
@@ -49,7 +49,6 @@ export class LoginComponent {
       error: err => {
         if (err.status == 401) this.loginStatus.set("Username and/or password incorrect.")
         else this.loginStatus.set("Login failed.");
-        
       }
     });
   }

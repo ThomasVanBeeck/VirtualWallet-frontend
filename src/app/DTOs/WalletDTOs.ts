@@ -1,7 +1,18 @@
-import { HoldingDTO } from "./HoldingDTOs";
-import { TransferDTO } from "./TransferDTOs";
+import { HoldingSummaryDTO } from "./HoldingDTOs";
+import { TransferSummaryDTO } from "./TransferDTOs";
 
-export interface WalletDTO {
-    Transfers: TransferDTO[],
-    Holdings: HoldingDTO[]
+export interface WalletSummaryDTO {
+    Transfers: TransferSummaryDTO[],
+    Holdings: HoldingSummaryDTO[]
+    TotalCash: number,
+    TotalValue: number,
+    TotalProfit: number,
+    WinLossPct: number
+}
+
+export interface WalletTotalDTO {
+    TotalCash: number,
+    TotalValue: number,
+    TotalProfit: number,
+    WinLossPct: number    
 }

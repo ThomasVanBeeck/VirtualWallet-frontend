@@ -1,6 +1,7 @@
 
-<h1>Market</h1>
-@if(stockData$ | async; as stockdata) {
+<h1 class="title">Market</h1>
+@if(stockData(); as stockdata)
+{
     <table>
         <thead>
             <th class="align-left">Name</th>
@@ -10,7 +11,7 @@
             <th class="align-right">Change (24h)</th>
         </thead>
 
-        @if(stockdata) {
+        @if(stockData()) {
         <tbody>
                 @for (stock of stockdata; track $index) {
                     @if(stock) {
@@ -27,5 +28,5 @@
                 }
             </tbody>
         }
-        </table>
-    }
+    </table>
+}

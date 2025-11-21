@@ -1,5 +1,10 @@
 export interface TransferDTO {
     Amount: number,
-    OrderDate: string,
+    Type: string
+}
+
+export interface TransferSummaryDTO {
+    Amount: number,
+    Date: string,
     Type: string
 }
