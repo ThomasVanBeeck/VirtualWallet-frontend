@@ -8,3 +8,9 @@ export interface TransferSummaryDTO {
     Date: string,
     Type: string
 }
+
+export interface TransfersPaginatedDTO {
+    Transfers: TransferSummaryDTO[];
+    PageNumber: number;
+    TotalPages: number;
+}

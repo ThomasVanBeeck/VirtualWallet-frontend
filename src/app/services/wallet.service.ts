@@ -1,13 +1,14 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { effect, inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { Observable, of, throwError } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { WalletSummaryDTO } from '../DTOs/WalletDTOs';
 import { HoldingSummaryDTO } from '../DTOs/HoldingDTOs';
-import { TransferDTO, TransferSummaryDTO } from '../DTOs/TransferDTOs';
+import { TransferDTO, TransfersPaginatedDTO, TransferSummaryDTO } from '../DTOs/TransferDTOs';
 import { AuthService } from './auth.service';
+import { AbstractControl, AsyncValidatorFn } from '@angular/forms';
 
-// TODO: transfer post failed bij withdrawal groter dan het beschikbare bedrag
+// TODO: transfer post failed bij withdrawal groter dan het beschikbare bedrag (=OK)
 // zowel in frontend form controle als in backend 
 
 
@@ -15,6 +16,23 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class WalletService {
+
+  constructor() {
+
+    this.createMockData(30)
+    this.mockWallet.TransferPage =  {
+      Transfers: this.mockTransferList,
+      PageNumber: 1,
+      TotalPages: this.mockTransferList.length
+    }
+
+    let totalCash = 0
+    for (const tf of this.mockTransferList) {
+      if (tf.Type === "Deposit") totalCash += tf.Amount
+      else totalCash -= tf.Amount
+    }
+    this.mockWallet.TotalCash = totalCash
+  }
 
   http = inject(HttpClient)
   authService = inject(AuthService)
@@ -31,36 +49,73 @@ export class WalletService {
     WinLossPct: 36.65
   }
 
-  mockTransfer1: TransferSummaryDTO = {
-    Amount: 10000,
-    Date: "money transfer date 1",
-    Type: "Deposit"
-  }
-
-  mockTransfer2: TransferSummaryDTO = {
-    Amount: 500,
-    Date: "money transfer date 2",
-    Type: "Withdrawal"
-  }
+  mockTransferList: TransferSummaryDTO[] = []
 
   mockWallet: WalletSummaryDTO = {
     Holdings: [this.mockHolding1],
-    Transfers: [this.mockTransfer1, this.mockTransfer2],
-    TotalCash: 10500,
+    TransferPage: { Transfers: [], PageNumber: 0, TotalPages: 0 },
+    TotalCash: 0,
     TotalValue: 10685.85,
     TotalProfit: 185.85,
     WinLossPct: 1.77
   }
+
+  private createMockData(num: number): void {
+    const firstTransfer: TransferSummaryDTO = {
+      Date: `2025-11-20T${1 * 2}:00:00Z`,
+      Amount: 50000,
+      Type: "Deposit"
+    }
+    this.mockTransferList.unshift(firstTransfer)
+
+    for (let i = 0; i < num; i++) {
+      const randomAmount: number = Math.floor((Math.random() * 10 + 1) * 5)
+      let randomType: string = "Deposit"
+      if (randomAmount % 2 == 0) randomType = "Withdrawal"
+      const transfer1: TransferSummaryDTO = { Date: `2025-11-20T${i * 2}:00:00Z`,
+        Amount: randomAmount,
+        Type: randomType
+      };
+      this.mockTransferList.unshift(transfer1);
+    }
+    console.log(`Mock Transfer List total: ${this.mockTransferList.length} transfers.`);
+  }
   
-  public getWallet(): Observable<WalletSummaryDTO> {
+public getWallet(page: number, size: number): Observable<WalletSummaryDTO> {
     if (environment.mockApi) {
       console.log("mock getWallet")
-      if (this.authService.isMockLoggedIn)
+      if (this.authService.isMockLoggedIn) {
+        
+        const startIndex = (page - 1) * size;
+        const totalItems = this.mockTransferList.length;
+        const totalPages: number = Math.ceil(totalItems / size);
+
+        let transfers: TransferSummaryDTO[];
+
+        if (startIndex >= totalItems) {
+          transfers = []
+        }
+        else
+          transfers = this.mockTransferList.slice(startIndex, startIndex + size)
+        
+        const transfersPaginatedDTO: TransfersPaginatedDTO = {
+          Transfers: transfers,
+          PageNumber: page,
+          TotalPages: totalPages
+        }
+        this.mockWallet.TransferPage = transfersPaginatedDTO
+
         return of(this.mockWallet)
+      }
       return throwError(() => ({ status: 401 }))
-    }
+  }
+  
+  let parameters = new HttpParams()
+  parameters = parameters.set('page', page.toString())
+  parameters = parameters.set('size', size.toString())
+  
     return this.http.get<WalletSummaryDTO>(`${this.apiUrl}/wallet`,
-      { withCredentials: true }
+      { params: parameters, withCredentials: true }
     )
   }
 
@@ -73,14 +128,15 @@ export class WalletService {
           Date: "determined by backend",
           Type: transferDTO.Type
         }
+
         if (newTransfer.Type === "Withdrawal" && newTransfer.Amount > this.mockWallet.TotalCash)
-          return throwError(() => ({ status: 401 }))
+          return throwError(() => ({ status: 400, message: "Insufficient Funds" }))
 
         if (newTransfer.Type === "Withdrawal")
           this.mockWallet.TotalCash -= newTransfer.Amount
         else this.mockWallet.TotalCash += newTransfer.Amount
 
-        this.mockWallet.Transfers.push(newTransfer)
+        this.mockTransferList.unshift(newTransfer)
         return of(undefined)
       }
       

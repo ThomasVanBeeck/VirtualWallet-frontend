@@ -1,8 +1,8 @@
 import { HoldingSummaryDTO } from "./HoldingDTOs";
-import { TransferSummaryDTO } from "./TransferDTOs";
+import { TransfersPaginatedDTO, TransferSummaryDTO } from "./TransferDTOs";
 
 export interface WalletSummaryDTO {
-    Transfers: TransferSummaryDTO[],
+    TransferPage: TransfersPaginatedDTO,
     Holdings: HoldingSummaryDTO[]
     TotalCash: number,
     TotalValue: number,

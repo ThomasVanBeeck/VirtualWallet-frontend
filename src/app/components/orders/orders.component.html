@@ -1,1 +1,125 @@
-<h1 class="title">Orders</h1>
+<div class="main-boxed">
+  <h1 class="title">Orders</h1>
+
+  <h2>Place Order</h2>
+  <form (ngSubmit)="submitOrder()" [formGroup]="orderForm" class="mainflex">
+    <div class="subflex">
+      <label class="darktext">Stockname</label>
+      <select formControlName="stockname">
+        <option value="" disabled>-- Choose stock --</option>
+        @for(stock of stockNamesAndPrices(); track stock) {
+        <option [value]="stock.StockName">{{ stock.StockName }}</option>
+        }
+      </select>
+    </div>
+    <div class="subflex">
+      <label class="darktext">Buy/Sell</label>
+      <select formControlName="type">
+        <option value="" disabled>-- Choose action --</option>
+        @for(type of orderTypes(); track type) {
+        <option [value]="type">{{ type }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="subflex">
+      <div>
+        <label class="darktext">Amount</label>
+        @if (amountCtrl.dirty && amountCtrl.hasError('required')) {
+        <label class="red-alert form-footer">*required</label>
+        } @else if (amountCtrl.dirty && amountCtrl.hasError('pattern')) {
+        <label class="red-alert form-footer">*invalid</label>
+        }
+      </div>
+      <input formControlName="amount" (blur)="onBlurAmount()" />
+    </div>
+
+    <div class="subflex">
+      <div>
+        <label class="darktext">Price per Share</label>
+      </div>
+      <input formControlName="price" />
+    </div>
+
+    <div class="subflex">
+      <div>
+        <label class="darktext">Total</label>
+      </div>
+      <input formControlName="total" />
+    </div>
+
+    <div class="subflex">
+      <button
+        class="maxwidth-6rem no-margin"
+        type="submit"
+        [disabled]="orderForm.invalid"
+      >
+        Place Order
+      </button>
+    </div>
+  </form>
+  <p class="form-footer min-p">{{ orderStatus() }}</p>
+  <h2>History</h2>
+
+  @if (orders(); as orders) {
+  <div class="table-5rows-wrapper">
+    <table>
+      <thead>
+        <th class="align-left">Stock</th>
+        <th class="align-left">Date</th>
+        <th class="align-left">Type</th>
+        <th class="align-right">Price</th>
+        <th class="align-right">Amount</th>
+        <th class="align-right">Total</th>
+      </thead>
+      <tbody>
+        @for (order of orders; track $index) { @if(order) {
+        <tr>
+          <td class="align-left">{{ order.StockName }}</td>
+          <td class="align-left">{{ order.OrderDate }}</td>
+          <td class="align-left">{{ order.Type }}</td>
+          <td class="align-right font-bold">
+            {{ order.Price | number : "1.2-2" }} $
+          </td>
+          <td class="align-right font-bold">{{ order.Amount }}</td>
+          <td class="align-right font-bold">
+            {{ order.Total | number : "1.2-2" }} $
+          </td>
+        </tr>
+        } }
+      </tbody>
+    </table>
+  </div>
+  } @if(totalPages(); as tp) { @if (tp > 1 ) {
+  <div class="pagination">
+    <button
+      class="pagebutton"
+      (click)="setPageNumber(paramPage() - 1)"
+      [disabled]="pageNumber() === 1"
+    >
+      &#60;
+    </button>
+    <button
+      class="pagebutton"
+      (click)="setPageNumber(paramPage() + 1)"
+      [disabled]="pageNumber() === totalPages()"
+    >
+      &#62;
+    </button>
+    @if(pageNumber() != 1) {
+    <button class="pagebutton" (click)="setPageNumber(1)">1</button>
+    } @if ((tp > 3 && (pageNumber() ?? 0) != 2) && pageNumber() != 1 ) {
+    <span class="darktext">...</span>
+    } @if (tp >= 3) {
+    <span class="activepage">{{ pageNumber() }}</span>
+    } @if ((tp > 3 && ((pageNumber() ?? 0)+1) != totalPages()) && pageNumber()
+    != totalPages()) {
+    <span class="darktext">...</span>
+    } @if (pageNumber() != totalPages()) {
+    <button class="pagebutton" (click)="setPageNumber(tp)">
+      {{ totalPages() }}
+    </button>
+    }
+  </div>
+  } }
+</div>

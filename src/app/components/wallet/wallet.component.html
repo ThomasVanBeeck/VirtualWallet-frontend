@@ -1,97 +1,162 @@
+<div class="main-boxed">
+  <h1 class="title">Wallet</h1>
 
-<h1 class="title">Wallet</h1>
+  <h2>Transfer Money</h2>
+  <form (ngSubmit)="transfer()" [formGroup]="transferForm" class="mainflex">
+    <div class="subflex">
+      <div>
+        <label class="darktext">Amount</label>
+        @if (amountCtrl.dirty && amountCtrl.hasError('required')) {
+        <label class="red-alert form-footer">*required</label>
+        } @else if (amountCtrl.dirty && amountCtrl.hasError('pattern')) {
+        <label class="red-alert form-footer">*invalid</label>
+        }
+      </div>
 
-<h2>Holdings</h2>
+      <input formControlName="amount" (blur)="onBlurAmount()" />
+    </div>
+    <div class="subflex">
+      <label class="darktext">Deposit/Withdrawal</label>
+      <select formControlName="type">
+        <option value="" disabled>-- Choose action --</option>
+        @for(type of transferTypes(); track type) {
+        <option [value]="type">{{ type }}</option>
+        }
+      </select>
+    </div>
+    <div class="subflex">
+      <button
+        class="maxwidth-6rem no-margin"
+        type="submit"
+        [disabled]="transferForm.invalid"
+      >
+        Transfer
+      </button>
+    </div>
+  </form>
+  <p class="form-footer min-p">{{ transferStatus() }}</p>
+  <h2>Cash Balance</h2>
 
-@if(holdings(); as holdings) {
+  @if(transfers(); as transfers) {
+  <div class="table-5rows-wrapper">
     <table>
-        <thead>
-            <th class="align-left">Name</th>
-            <th class="align-left">Amount</th>
-            <th class="align-right">Avg Price</th>
-            <th class="align-right">Total Value</th>
-            <th class="align-right">Win/Loss Pct</th>
-        </thead>
-        <tbody>
-            @for (holding of holdings; track $index) {
-                @if(holding) {
-                    <tr>
-                        <td class="align-left"> {{ holding.StockName }}</td>
-                        <td class="align-left"> {{ holding.Amount }}</td>
-                        <td class="align-right font-bold"> {{ holding.AvgPrice | number:'1.2-2'}} $</td>
-                        <td class="align-right font-bold">{{ holding.TotalValue| number:'1.2-2'}} $</td>
-                        <td class="align-right font-bold"
-                        [class.green-stock]="holding.WinLossPct > 0"
-                            [class.red-stock]="holding.WinLossPct < 0"> {{ holding.WinLossPct | number:'1.2-2'}} %</td>
-                    </tr>
-                }
-            }
-        </tbody>
+      <thead>
+        <tr>
+          <th class="align-left">Type</th>
+          <th class="align-left">Date</th>
+          <th class="align-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (transfer of transfers; track $index) { @if(transfer) {
+        <tr>
+          <td class="align-left">{{ transfer.Type }}</td>
+          <td class="align-left">{{ transfer.Date }}</td>
+          <td class="align-right font-bold">
+            {{ transfer.Amount | number : "1.2-2" }} $
+          </td>
+        </tr>
+        } }
+      </tbody>
     </table>
-}
+  </div>
+  } @if(totalPages(); as tp) { @if (tp > 1 ) {
+  <div class="pagination">
+    <button
+      class="pagebutton"
+      (click)="setPageNumber(paramPage() - 1)"
+      [disabled]="pageNumber() === 1"
+    >
+      &#60;
+    </button>
+    <button
+      class="pagebutton"
+      (click)="setPageNumber(paramPage() + 1)"
+      [disabled]="pageNumber() === totalPages()"
+    >
+      &#62;
+    </button>
+    @if(pageNumber() != 1) {
+    <button class="pagebutton" (click)="setPageNumber(1)">1</button>
+    } @if ((tp > 3 && (pageNumber() ?? 0) != 2) && pageNumber() != 1 ) {
+    <span class="darktext">...</span>
+    } @if (tp >= 3) {
+    <span class="activepage">{{ pageNumber() }}</span>
+    } @if ((tp > 3 && ((pageNumber() ?? 0)+1) != totalPages()) && pageNumber()
+    != totalPages()) {
+    <span class="darktext">...</span>
+    } @if (pageNumber() != totalPages()) {
+    <button class="pagebutton" (click)="setPageNumber(tp)">
+      {{ totalPages() }}
+    </button>
+    }
+  </div>
+  } } @if(walletTotals(); as walletTotals) {
+  <table>
+    <thead>
+      <th class="align-left">Transferred Cash</th>
+      <th class="align-left">Cash in Stocks</th>
+      <th class="align-right">Profit</th>
+      <th class="align-right">Win/Loss Pct</th>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="align-left font-bold">
+          {{ walletTotals.TotalCash | number : "1.2-2" }} $
+        </td>
+        <td class="align-left font-bold">
+          {{ walletTotals.TotalValue | number : "1.2-2" }} $
+        </td>
+        <td
+          class="align-right font-bold"
+          [class.green-stock]="walletTotals.TotalProfit > 0"
+          [class.red-stock]="walletTotals.TotalProfit < 0"
+        >
+          {{ walletTotals.TotalProfit | number : "1.2-2" }} $
+        </td>
+        <td
+          class="align-right font-bold"
+          [class.green-stock]="walletTotals.WinLossPct > 0"
+          [class.red-stock]="walletTotals.WinLossPct < 0"
+        >
+          {{ walletTotals.WinLossPct | number : "1.2-2" }} %
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  }
+  <h2>Holdings</h2>
 
-<h2>Cash Balance</h2>
-
-@if(transfers(); as transfers) {
-    <table>
-        <thead>
-            <th class="align-left">Type</th>
-            <th class="align-left">Date</th>
-            <th class="align-right">Amount</th>
-        </thead>
-        <tbody>
-            @for (transfer of transfers; track $index) {
-                @if(transfer) {
-                    <tr>
-                        <td class="align-left"> {{ transfer.Type }}</td>
-                        <td class="align-left"> {{ transfer.Date }}</td>
-                        <td class="align-right font-bold">{{ transfer.Amount | number:'1.2-2' }} $</td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
-}
-
-@if(walletTotals(); as walletTotals) {
-    <table>
-        <thead>
-            <th class="align-right">Transferred Cash</th>
-            <th class="align-right">Current Value</th>
-            <th class="align-right">Profit</th>
-            <th class="align-right">Win/Loss Pct</th>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="align-right font-bold">{{ walletTotals.TotalCash | number:'1.2-2' }} $</td>
-                <td class="align-right font-bold">{{ walletTotals.TotalValue | number:'1.2-2' }} $</td>
-                <td class="align-right font-bold"
-                                        [class.green-stock]="walletTotals.TotalProfit > 0"
-                            [class.red-stock]="walletTotals.TotalProfit < 0">{{ walletTotals.TotalProfit | number:'1.2-2' }} $</td>
-                <td class="align-right font-bold"
-                                        [class.green-stock]="walletTotals.WinLossPct > 0"
-                            [class.red-stock]="walletTotals.WinLossPct < 0">{{ walletTotals.WinLossPct | number:'1.2-2' }} %</td>
-            </tr>
-        </tbody>
-    </table>
-}
-
-<h2>Action</h2>
-    <form (ngSubmit)="transfer()" [formGroup]="transferForm">
-        <div class="transfer">
-            <div class="sub-transfer">
-                <label>Amount</label>
-                <input formControlName="amount" />
-            </div>
-            <div class="sub-transfer">
-                <label>Deposit/Withdrawal</label>
-                <select formControlName="type">
-                    <option value="" disabled> -- Choose action --</option>
-                    @for(type of transferTypes(); track type) {
-                        <option [value]="type">{{ type }}</option>
-                    }
-                </select>
-            </div>
-            <button class="transfer-button" type="submit" [disabled]="transferForm.invalid">Transfer</button>
-        </div>
-    </form>
+  @if(holdings(); as holdings) {
+  <table>
+    <thead>
+      <th class="align-left">Name</th>
+      <th class="align-left">Amount</th>
+      <th class="align-right">Avg Price</th>
+      <th class="align-right">Total Value</th>
+      <th class="align-right">Win/Loss Pct</th>
+    </thead>
+    <tbody>
+      @for (holding of holdings; track $index) { @if(holding) {
+      <tr>
+        <td class="align-left">{{ holding.StockName }}</td>
+        <td class="align-left">{{ holding.Amount }}</td>
+        <td class="align-right font-bold">
+          {{ holding.AvgPrice | number : "1.2-2" }} $
+        </td>
+        <td class="align-right font-bold">
+          {{ holding.TotalValue | number : "1.2-2" }} $
+        </td>
+        <td
+          class="align-right font-bold"
+          [class.green-stock]="holding.WinLossPct > 0"
+          [class.red-stock]="holding.WinLossPct < 0"
+        >
+          {{ holding.WinLossPct | number : "1.2-2" }} %
+        </td>
+      </tr>
+      } }
+    </tbody>
+  </table>
+  }
+</div>
