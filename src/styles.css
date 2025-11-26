@@ -13,9 +13,10 @@
 }
 
 .table-5rows-wrapper {
-  min-height: 17.5rem;
+  min-height: 16.2rem;
   display: flex;
   align-items: flex-start;
+  margin: 0rem;
 }
 
 @font-face {
@@ -63,10 +64,21 @@ h1.title {
   color: var(--background-dark);
 }
 
+.available-cash {
+  background-color: #698379;
+  display: inline-block;
+  padding: 0.5rem;
+  border: 2px solid var(--background-dark);
+  border-radius: 4px;
+  margin: 0rem 0rem 0.5rem 0rem;
+}
+
 h2 {
   font-size: 1.55rem;
   color: var(--background-dark);
   padding: 0rem;
+  margin-top: 0.6rem;
+  margin-bottom: 1rem;
 }
 
 .min-p {
@@ -132,7 +144,7 @@ table {
   color: var(--background-dark);
   padding: 0.2rem;
   width: 100%;
-  margin: 1rem auto;
+  margin: 0.3rem auto;
   border-collapse: collapse;
 }
 
@@ -245,9 +257,9 @@ form > * {
 form input,
 select {
   box-sizing: border-box;
-  background-color: #394f63;
+  background-color: var(--background-mid);
   color: white;
-  border: 0px solid #243341;
+  border: 0px solid var(--background-mid);
   border-radius: 4px;
   height: 1.8rem;
   width: 100%;

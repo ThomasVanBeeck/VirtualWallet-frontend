@@ -54,7 +54,7 @@ export class WalletService {
 
   private mockTransferList: TransferSummaryDTO[] = [];
 
-  private mockWallet: WalletSummaryDTO = {
+  public mockWallet: WalletSummaryDTO = {
     Holdings: [this.mockHolding1],
     TransferPage: { Transfers: [], PageNumber: 0, TotalPages: 0 },
     TotalCash: 0,
@@ -65,7 +65,7 @@ export class WalletService {
 
   private createMockData(num: number): void {
     const firstTransfer: TransferSummaryDTO = {
-      Date: `2025-11-20T${1 * 2}:00:00Z`,
+      Date: new Date().toISOString(),
       Amount: 50000,
       Type: 'Deposit',
     };
@@ -76,7 +76,7 @@ export class WalletService {
       let randomType: string = 'Deposit';
       if (randomAmount % 2 == 0) randomType = 'Withdrawal';
       const transfer1: TransferSummaryDTO = {
-        Date: `2025-11-20T${i * 2}:00:00Z`,
+        Date: new Date().toISOString(),
         Amount: randomAmount,
         Type: randomType,
       };
@@ -102,6 +102,7 @@ export class WalletService {
       console.log('mock getWallet');
       if (this.authService.isMockLoggedIn) {
         const startIndex = (page - 1) * size;
+        const endIndex = page * size;
         const totalItems = this.mockTransferList.length;
         const totalPages: number = Math.ceil(totalItems / size);
 
@@ -153,7 +154,7 @@ export class WalletService {
       if (this.authService.isMockLoggedIn) {
         const newTransfer: TransferSummaryDTO = {
           Amount: transferDTO.Amount,
-          Date: 'determined by backend',
+          Date: `1999-01-01T01:00:00Z`,
           Type: transferDTO.Type,
         };
 

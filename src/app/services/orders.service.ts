@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { OrderDTO, OrderPostDTO, OrdersPaginatedDTO } from '../DTOs/OrderDTOs';
 import { catchError, Observable, of, throwError } from 'rxjs';
+import { WalletService } from './wallet.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,12 +16,13 @@ export class OrdersService {
 
   http = inject(HttpClient);
   authService = inject(AuthService);
+  walletService = inject(WalletService);
 
   private apiUrl = environment.apiUrl;
 
   mockOrder1: OrderDTO = {
     StockName: 'Tesla',
-    OrderDate: '2025-11-20T08:00:00Z',
+    OrderDate: new Date().toISOString(),
     Type: 'Buy',
     Price: 123.45,
     Amount: 5,
@@ -29,7 +31,7 @@ export class OrdersService {
 
   mockOrder2: OrderDTO = {
     StockName: 'Bitcoin',
-    OrderDate: '2025-11-20T08:00:00Z',
+    OrderDate: new Date().toISOString(),
     Type: 'Sell',
     Price: 234.56,
     Amount: 3,
@@ -45,7 +47,7 @@ export class OrdersService {
       if (randomAmount % 2 == 0) randomType = 'Buy';
       const order1: OrderDTO = {
         ...this.mockOrder1,
-        OrderDate: `2025-11-20T${i * 2}:00:00Z`,
+        OrderDate: new Date().toISOString(),
         Price: this.mockOrder1.Price + i * 0.1,
         Amount: randomAmount,
         Type: randomType,
@@ -53,7 +55,7 @@ export class OrdersService {
       };
       const order2: OrderDTO = {
         ...this.mockOrder2,
-        OrderDate: `2025-11-20T${i * 2 + 1}:00:00Z`,
+        OrderDate: new Date().toISOString(),
         Price: this.mockOrder2.Price - i * 0.1,
         Amount: randomAmount,
         Type: randomType,
@@ -76,11 +78,15 @@ export class OrdersService {
       if (this.authService.isMockLoggedIn) {
         const startIndex = (page - 1) * size;
         const endIndex = page * size;
+        const totalItems = this.mockOrderList.length;
+        let totalPages: number = Math.ceil(totalItems / size);
+
         let orders: OrderDTO[];
-        let totalPages: number = Math.ceil(this.mockOrderList.length / size);
-        if (startIndex >= this.mockOrderList.length) {
+
+        if (startIndex >= totalItems) {
           orders = [];
-        } else orders = this.mockOrderList.slice(startIndex, endIndex);
+        } else orders = this.mockOrderList.slice(startIndex, startIndex + size);
+
         const ordersPaginatedDTO: OrdersPaginatedDTO = {
           Orders: orders,
           PageNumber: page,
@@ -110,6 +116,14 @@ export class OrdersService {
 
   public postOrder(orderPostDTO: OrderPostDTO): Observable<void> {
     if (environment.mockApi) {
+      const orderCashTotal = orderPostDTO.Price * orderPostDTO.Amount;
+      if (
+        this.walletService.mockWallet.TotalCash < orderCashTotal &&
+        orderPostDTO.Type === 'Buy'
+      )
+        return throwError(
+          () => new Error('Insufficient amount of cash available.')
+        );
       if (this.authService.isMockLoggedIn) {
         const newOrder: OrderDTO = {
           StockName: orderPostDTO.StockName,
@@ -117,9 +131,16 @@ export class OrdersService {
           Type: orderPostDTO.Type,
           Price: orderPostDTO.Price,
           Amount: orderPostDTO.Amount,
-          Total: orderPostDTO.Price * orderPostDTO.Amount,
+          Total: orderCashTotal,
         };
         this.mockOrderList.unshift(newOrder);
+        if (orderPostDTO.Type === 'Buy')
+          this.walletService.mockWallet.TotalCash -=
+            orderPostDTO.Price * orderPostDTO.Amount;
+        else
+          this.walletService.mockWallet.TotalCash +=
+            orderPostDTO.Price * orderPostDTO.Amount;
+
         return of(void 0);
       }
       return throwError(() => new Error('Mock postOrder failed.'));

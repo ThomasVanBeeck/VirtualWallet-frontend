@@ -2,7 +2,9 @@
   <h1 class="title">Orders</h1>
 
   <h2>Place Order</h2>
-  <p>Available cash: {{ availableCash() }} $</p>
+  <p class="available-cash">
+    Available Cash: {{ totalCash() | number : "1.2-2" : "en-US" }} $
+  </p>
   <form (ngSubmit)="submitOrder()" [formGroup]="orderForm" class="mainflex">
     <div class="subflex">
       <label class="darktext">Stockname</label>
@@ -77,7 +79,9 @@
         @for (order of orders; track $index) { @if(order) {
         <tr>
           <td class="align-left">{{ order.StockName }}</td>
-          <td class="align-left">{{ order.OrderDate }}</td>
+          <td class="align-left">
+            {{ order.OrderDate | date : "d MMMM yyyy, h:mm a" }}
+          </td>
           <td class="align-left">{{ order.Type }}</td>
           <td class="align-right font-bold">
             {{ order.Price | number : "1.2-2" }} $
@@ -109,12 +113,12 @@
     </button>
     @if(pageNumber() != 1) {
     <button class="pagebutton" (click)="setPageNumber(1)">1</button>
-    } @if ((tp > 3 && (pageNumber() ?? 0) != 2) && pageNumber() != 1 ) {
+    } @if ((tp > 3 && pageNumber() != 2) && pageNumber() != 1 ) {
     <span class="darktext">...</span>
     } @if (tp >= 3) {
     <span class="activepage">{{ pageNumber() }}</span>
-    } @if ((tp > 3 && ((pageNumber() ?? 0)+1) != totalPages()) && pageNumber()
-    != totalPages()) {
+    } @if ((tp > 3 && (pageNumber()+1) != totalPages()) && pageNumber() !=
+    totalPages()) {
     <span class="darktext">...</span>
     } @if (pageNumber() != totalPages()) {
     <button class="pagebutton" (click)="setPageNumber(tp)">

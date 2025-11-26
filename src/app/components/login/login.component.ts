@@ -51,7 +51,7 @@ export class LoginComponent {
 
     this.authService.login(userLoginDTO).subscribe({
       next: () => {
-        this.router.navigate(['/app/welcome']);
+        this.router.navigate(['/app/']);
         this.loginStatus.set('');
       },
       error: (err) => {

@@ -9,14 +9,16 @@ import {
   OrdersPaginatedDTO,
 } from '../../DTOs/OrderDTOs';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { MarketDataService } from '../../services/market-data.service';
 import { commaToDot } from '../../validators/commatodot.validator';
 import { HoldingNamePriceDTO } from '../../DTOs/HoldingDTOs';
+import { WalletService } from '../../services/wallet.service';
+import { WalletSummaryDTO } from '../../DTOs/WalletDTOs';
 
 @Component({
   selector: 'app-orders',
-  imports: [DecimalPipe, ReactiveFormsModule],
+  imports: [DecimalPipe, ReactiveFormsModule, DatePipe],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.css',
 })
@@ -59,6 +61,7 @@ export class OrdersComponent {
 
   protected readonly ordersService = inject(OrdersService);
   protected readonly marketDataService = inject(MarketDataService);
+  protected readonly walletService = inject(WalletService);
 
   protected readonly orderStatus = signal<string>('');
   protected readonly orderTypes = signal<string[]>(['Buy', 'Sell']);
@@ -66,8 +69,18 @@ export class OrdersComponent {
   protected readonly paramPage = signal(1);
   protected readonly paramSize = signal(5);
 
-  // TIJDELIJK
-  protected readonly availableCash = signal(123456);
+  private wallet$: Observable<WalletSummaryDTO> = toObservable(
+    this.refreshTrigger
+  ).pipe(
+    switchMap(() =>
+      this.walletService.getWallet(this.paramPage(), this.paramSize())
+    )
+  );
+
+  protected readonly totalCash: Signal<number> = toSignal(
+    this.wallet$.pipe(map((wallet) => wallet.TotalCash)),
+    { initialValue: 0 }
+  );
 
   private ordersInfo$: Observable<OrdersPaginatedDTO> = toObservable(
     this.refreshTrigger

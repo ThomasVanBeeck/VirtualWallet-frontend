@@ -51,7 +51,9 @@
         @for (transfer of transfers; track $index) {
         <tr>
           <td class="align-left">{{ transfer.Type }}</td>
-          <td class="align-left">{{ transfer.Date }}</td>
+          <td class="align-left">
+            {{ transfer.Date | date : "d MMMM yyyy, h:mm a" }}
+          </td>
           <td class="align-right font-bold">
             {{ transfer.Amount | number : "1.2-2" }} $
           </td>

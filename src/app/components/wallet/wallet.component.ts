@@ -4,7 +4,7 @@ import { WalletService } from '../../services/wallet.service';
 import { map, Observable, switchMap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { HoldingSummaryDTO } from '../../DTOs/HoldingDTOs';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { WalletSummaryDTO, WalletTotalDTO } from '../../DTOs/WalletDTOs';
@@ -12,7 +12,7 @@ import { commaToDot } from '../../validators/commatodot.validator';
 
 @Component({
   selector: 'app-wallet',
-  imports: [DecimalPipe, ReactiveFormsModule],
+  imports: [DecimalPipe, ReactiveFormsModule, DatePipe],
   templateUrl: './wallet.component.html',
   styleUrl: './wallet.component.css',
 })
