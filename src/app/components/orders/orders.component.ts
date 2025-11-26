@@ -66,6 +66,9 @@ export class OrdersComponent {
   protected readonly paramPage = signal(1);
   protected readonly paramSize = signal(5);
 
+  // TIJDELIJK
+  protected readonly availableCash = signal(123456);
+
   private ordersInfo$: Observable<OrdersPaginatedDTO> = toObservable(
     this.refreshTrigger
   ).pipe(

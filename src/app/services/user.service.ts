@@ -10,76 +10,92 @@ import { AbstractControl, AsyncValidatorFn } from '@angular/forms';
   providedIn: 'root',
 })
 export class UserService {
+  http = inject(HttpClient);
+  authService = inject(AuthService);
 
-  http = inject(HttpClient)
-  authService = inject(AuthService)
-  
-  private apiUrl = environment.apiUrl
+  private apiUrl = environment.apiUrl;
 
   public getCurrentUser(): Observable<UserDTO> {
     if (environment.mockApi) {
-      console.log("mock getCurrentUser")
+      console.log('mock getCurrentUser');
       if (this.authService.isMockLoggedIn && this.authService.currentMockUser) {
-        return of(this.authService.currentMockUser)
+        return of(this.authService.currentMockUser);
       }
-      return throwError(() => ({ status: 401 }))
+      return throwError(() => new Error('Mock getCurrentUser failed.'));
     }
-  
-    return this.http.get<UserDTO>(
-      `${this.apiUrl}/user/current-user`,
-      { withCredentials: true }
-    );
+
+    return this.http
+      .get<UserDTO>(`${this.apiUrl}/user/current-user`, {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((err) => {
+          console.error('getCurrentUser API error:', err);
+          return throwError(() => err);
+        })
+      );
   }
 
-  public registerNewUser(userRegisterDTO: UserRegisterDTO): Observable<void> { 
-    
+  public registerNewUser(userRegisterDTO: UserRegisterDTO): Observable<void> {
     if (environment.mockApi) {
-      console.log("Mock: registerNewUser called")
-      
+      console.log('Mock: registerNewUser called');
+
       const existingUser = this.authService.mockNewUsers.find(
-        user => user.Username === userRegisterDTO.Username
+        (user) => user.Username === userRegisterDTO.Username
       );
 
       if (existingUser) {
-        console.error(`Mock: User '${userRegisterDTO.Username}' already exists.`)
-        return throwError(() => ({ 
-          status: 409, 
-          error: "Username already taken" 
-        }))
+        console.error(
+          `Mock: User '${userRegisterDTO.Username}' already exists.`
+        );
+        return throwError(() => new Error('Mock: username already taken'));
       }
 
       this.authService.mockNewUsers.push(userRegisterDTO);
-      console.log(`Mock: New User '${userRegisterDTO.Username}' registered.`)
-      return of(undefined)
+      console.log(`Mock: New User '${userRegisterDTO.Username}' registered.`);
+      return of(void 0);
+    } else {
+      return this.http
+        .post<void>(`${this.apiUrl}/user/create-user`, userRegisterDTO, {
+          withCredentials: true,
+        })
+        .pipe(
+          catchError((err) => {
+            console.error('registerNewUser API error:', err);
+            return throwError(() => err);
+          })
+        );
     }
-    
-    return this.http.post<void>(
-      `${this.apiUrl}/user/create-user`,
-      userRegisterDTO,
-      { withCredentials: true }
-    )
   }
 
-  usernameExists(username: string): Observable<boolean>  {
+  usernameExists(username: string): Observable<boolean> {
     if (environment.mockApi) {
-      console.log("Mock: usernameExists called")
-      
-      const existingUser = this.authService.mockNewUsers.some(
-        user => user.Username === username);
-      return of (existingUser)
-    }
+      console.log('Mock: usernameExists called');
 
-    return this.http.get<boolean>(`${this.apiUrl}/user/exists/${username}`,
-      { withCredentials: true }
-    )
+      const existingUser = this.authService.mockNewUsers.some(
+        (user) => user.Username === username
+      );
+      return of(existingUser);
+    } else {
+      return this.http
+        .get<boolean>(`${this.apiUrl}/user/exists/${username}`, {
+          withCredentials: true,
+        })
+        .pipe(
+          catchError((err) => {
+            console.error('usernameExists API error:', err);
+            return of(false);
+          })
+        );
+    }
   }
 
   public validateUsername(): AsyncValidatorFn {
     return (control: AbstractControl) => {
       return this.usernameExists(control.value).pipe(
-        map(exists => (exists ? { usernameTaken: true } : null)),
+        map((exists) => (exists ? { usernameTaken: true } : null)),
         catchError(() => of(null))
-      )
-    }
+      );
+    };
   }
 }

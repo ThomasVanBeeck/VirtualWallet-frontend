@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { OrderDTO, OrderPostDTO, OrdersPaginatedDTO } from '../DTOs/OrderDTOs';
-import { Observable, of, throwError } from 'rxjs';
+import { catchError, Observable, of, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +20,7 @@ export class OrdersService {
 
   mockOrder1: OrderDTO = {
     StockName: 'Tesla',
-    OrderDate: 'determined by backend',
+    OrderDate: '2025-11-20T08:00:00Z',
     Type: 'Buy',
     Price: 123.45,
     Amount: 5,
@@ -29,7 +29,7 @@ export class OrdersService {
 
   mockOrder2: OrderDTO = {
     StockName: 'Bitcoin',
-    OrderDate: 'determined by backend',
+    OrderDate: '2025-11-20T08:00:00Z',
     Type: 'Sell',
     Price: 234.56,
     Amount: 3,
@@ -87,37 +87,53 @@ export class OrdersService {
           TotalPages: totalPages,
         };
         return of(ordersPaginatedDTO);
-      } else {
-        return throwError(() => ({ status: 401 }));
       }
+      return throwError(() => new Error('Mock getOrderHistory failed.'));
+    } else {
+      let parameters = new HttpParams();
+      parameters = parameters.set('page', page.toString());
+      parameters = parameters.set('size', size.toString());
+
+      return this.http
+        .get<OrdersPaginatedDTO>(`${this.apiUrl}/order/all`, {
+          params: parameters,
+          withCredentials: true,
+        })
+        .pipe(
+          catchError((err) => {
+            console.error('getOrderHistory API error:', err);
+            return throwError(() => err);
+          })
+        );
     }
-
-    let parameters = new HttpParams();
-    parameters = parameters.set('page', page.toString());
-    parameters = parameters.set('size', size.toString());
-
-    return this.http.get<OrdersPaginatedDTO>(`${this.apiUrl}/order/all`, {
-      params: parameters,
-      withCredentials: true,
-    });
   }
 
   public postOrder(orderPostDTO: OrderPostDTO): Observable<void> {
-    if (environment.mockApi) console.log('mock postOrder');
-    if (this.authService.isMockLoggedIn) {
-      const newOrder: OrderDTO = {
-        StockName: orderPostDTO.StockName,
-        OrderDate: '2025-11-20T$08:00:00Z',
-        Type: orderPostDTO.Type,
-        Price: orderPostDTO.Price,
-        Amount: orderPostDTO.Amount,
-        Total: orderPostDTO.Price * orderPostDTO.Amount,
-      };
-      this.mockOrderList.unshift(newOrder);
-      return of(undefined);
+    if (environment.mockApi) {
+      if (this.authService.isMockLoggedIn) {
+        const newOrder: OrderDTO = {
+          StockName: orderPostDTO.StockName,
+          OrderDate: '2025-11-20T08:00:00Z',
+          Type: orderPostDTO.Type,
+          Price: orderPostDTO.Price,
+          Amount: orderPostDTO.Amount,
+          Total: orderPostDTO.Price * orderPostDTO.Amount,
+        };
+        this.mockOrderList.unshift(newOrder);
+        return of(void 0);
+      }
+      return throwError(() => new Error('Mock postOrder failed.'));
+    } else {
+      return this.http
+        .post<void>(`${this.apiUrl}/order/submit`, orderPostDTO, {
+          withCredentials: true,
+        })
+        .pipe(
+          catchError((err) => {
+            console.error('postOrder API error:', err);
+            return throwError(() => err);
+          })
+        );
     }
-    return this.http.post<void>(`${this.apiUrl}/order/submit`, orderPostDTO, {
-      withCredentials: true,
-    });
   }
 }

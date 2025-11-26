@@ -24,7 +24,7 @@ export class WalletComponent {
       });
     }
     effect(() => {
-      const _ = this.formChanges();
+      const nothing = this.formChanges();
       if (this.transferForm.dirty) {
         this.transferStatus.set('');
       }
@@ -48,23 +48,27 @@ export class WalletComponent {
     )
   );
 
-  transfers: Signal<TransferSummaryDTO[] | undefined> = toSignal(
-    this.wallet$.pipe(map((wallet) => wallet.TransferPage.Transfers))
+  transfers: Signal<TransferSummaryDTO[]> = toSignal(
+    this.wallet$.pipe(map((wallet) => wallet.TransferPage.Transfers)),
+    { initialValue: [] }
   );
 
-  holdings: Signal<HoldingSummaryDTO[] | undefined> = toSignal(
-    this.wallet$.pipe(map((wallet) => wallet.Holdings))
+  holdings: Signal<HoldingSummaryDTO[]> = toSignal(
+    this.wallet$.pipe(map((wallet) => wallet.Holdings)),
+    { initialValue: [] }
   );
 
-  pageNumber: Signal<number | undefined> = toSignal(
-    this.wallet$.pipe(map((wallet) => wallet.TransferPage.PageNumber))
+  pageNumber: Signal<number> = toSignal(
+    this.wallet$.pipe(map((wallet) => wallet.TransferPage.PageNumber)),
+    { initialValue: 1 }
   );
 
-  totalPages: Signal<number | undefined> = toSignal(
-    this.wallet$.pipe(map((wallet) => wallet.TransferPage.TotalPages))
+  totalPages: Signal<number> = toSignal(
+    this.wallet$.pipe(map((wallet) => wallet.TransferPage.TotalPages)),
+    { initialValue: 1 }
   );
 
-  walletTotals: Signal<WalletTotalDTO | undefined> = toSignal(
+  walletTotals: Signal<WalletTotalDTO> = toSignal(
     this.wallet$.pipe(
       map((walletSummary) => ({
         TotalCash: walletSummary.TotalCash,
