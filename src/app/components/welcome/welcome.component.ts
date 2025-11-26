@@ -9,16 +9,16 @@ import { UserService } from '../../services/user.service';
   selector: 'app-welcome',
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.css'],
-  imports: []
+  imports: [],
 })
 export class WelcomeComponent implements OnInit {
   public username: string = 'gast';
-  public classname: string = "unchanged"
-  public classtoggle: boolean = false
+  public classname: string = 'unchanged';
+  public classtoggle: boolean = false;
 
-  userService = inject(UserService)
-  marketDataService = inject(MarketDataService)
-  router = inject(Router)
+  userService = inject(UserService);
+  marketDataService = inject(MarketDataService);
+  router = inject(Router);
 
   ngOnInit(): void {
     this.fetchUsername();
@@ -26,9 +26,8 @@ export class WelcomeComponent implements OnInit {
 
   changeLayout(): void {
     this.classtoggle = !this.classtoggle;
-    if (this.classtoggle)
-      this.classname = "unchanged"
-    else this.classname = "changed"
+    if (this.classtoggle) this.classname = 'unchanged';
+    else this.classname = 'changed';
   }
 
   fetchUsername(): void {
@@ -38,9 +37,9 @@ export class WelcomeComponent implements OnInit {
       },
       error: (err) => {
         console.error('Fout bij ophalen gebruikersnaam:', err);
-        this.username = 'gebruiker (fout)';
-        this.router.navigate(['login'])
-      }
+        this.username = 'username (error)';
+        this.router.navigate(['login']);
+      },
     });
   }
 }

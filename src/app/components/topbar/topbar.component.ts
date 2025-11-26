@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive} from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -9,17 +9,16 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './topbar.component.css',
 })
 export class TopbarComponent {
-  authService = inject(AuthService)
-  router = inject(Router)
+  authService = inject(AuthService);
+  router = inject(Router);
 
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
-        console.log("logout ok")
-        this.router.navigate(['login'])
+        console.log('logout ok');
+        this.router.navigate(['login']);
       },
-      error: err => console.error("logout  failed", err)
-    })
+      error: (err) => console.error('logout  failed', err),
+    });
   }
-
 }

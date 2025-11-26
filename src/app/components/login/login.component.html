@@ -1,24 +1,31 @@
 <h1>Login</h1>
 <form (ngSubmit)="login()" [formGroup]="loginForm">
   <p class="form-footer">
-  Don't have an account? 
-  <a href routerLink="/register">Register</a>
+    Don't have an account?
+    <a href routerLink="/register">Register</a>
   </p>
   <p>
-<label>Username</label>
-@if (usernameCtrl.dirty && usernameCtrl.hasError('required')) {
-  <label class="red-alert form-footer">*username required</label>
-}
+    <label>Username</label>
+    @if (usernameCtrl.dirty && usernameCtrl.hasError('required')) {
+    <label class="red-alert form-footer">*username required</label>
+    }
   </p>
   <input formControlName="username" />
-<p><label>Password</label>
-@if (passwordCtrl.dirty && passwordCtrl.hasError('required')) {
-  <label class="red-alert form-footer">*password required</label>
-}
-</p>
+  <p>
+    <label>Password</label>
+    @if (passwordCtrl.dirty && passwordCtrl.hasError('required')) {
+    <label class="red-alert form-footer">*password required</label>
+    }
+  </p>
 
-  <input formControlName="password" type="password">
+  <input formControlName="password" type="password" />
   <button type="submit" [disabled]="loginForm.invalid">Login</button>
-  <label  class="form-footer" [class]="loginStatus() === 'Connecting...' ? 'white-text' : 'red-alert-no-margin'">
-    {{loginStatus()}}</label>
-  </form>
+  <label
+    class="form-footer"
+    [class]="
+      loginStatus() === 'Connecting...' ? 'white-text' : 'red-alert-no-margin'
+    "
+  >
+    {{ loginStatus() }}</label
+  >
+</form>

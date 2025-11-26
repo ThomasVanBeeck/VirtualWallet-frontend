@@ -11,6 +11,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './market.component.css',
 })
 export class MarketComponent {
-  marketData = inject(MarketDataService)
-  stockData: Signal<StockModel[] | undefined> = toSignal(this.marketData.getStockData())
+  marketData = inject(MarketDataService);
+  stockData: Signal<StockModel[]> = toSignal(this.marketData.getStockData(), {
+    initialValue: [],
+  });
 }

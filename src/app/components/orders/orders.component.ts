@@ -93,15 +93,18 @@ export class OrdersComponent {
     { initialValue: [] }
   );
 
-  orders: Signal<OrderDTO[] | undefined> = toSignal(
-    this.ordersInfo$.pipe(map((info) => info.Orders))
+  orders: Signal<OrderDTO[]> = toSignal(
+    this.ordersInfo$.pipe(map((info) => info.Orders)),
+    { initialValue: [] }
   );
-  pageNumber: Signal<number | undefined> = toSignal(
-    this.ordersInfo$.pipe(map((info) => info.PageNumber))
+  pageNumber: Signal<number> = toSignal(
+    this.ordersInfo$.pipe(map((info) => info.PageNumber)),
+    { initialValue: 1 }
   );
 
-  totalPages: Signal<number | undefined> = toSignal(
-    this.ordersInfo$.pipe(map((info) => info.TotalPages))
+  totalPages: Signal<number> = toSignal(
+    this.ordersInfo$.pipe(map((info) => info.TotalPages)),
+    { initialValue: 1 }
   );
 
   private readonly fb = inject(FormBuilder);

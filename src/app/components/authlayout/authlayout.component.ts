@@ -10,20 +10,18 @@ import { UserRegisterDTO } from '../../DTOs/UserDTOs';
   styleUrl: './authlayout.component.css',
 })
 export class AuthlayoutComponent implements OnInit {
-  userService = inject(UserService)
-  router = inject(Router)
+  userService = inject(UserService);
+  router = inject(Router);
 
   ngOnInit(): void {
-    this.checkIfLoggedIn()
+    this.checkIfLoggedIn();
   }
 
   checkIfLoggedIn(): void {
-      this.userService.getCurrentUser().subscribe({
-        next: (data: UserRegisterDTO) => {
-          if (data !== null) this.router.navigate(['welcome'])
-        },
-        error: (err) => {
-        }
-      });
-    }
+    this.userService.getCurrentUser().subscribe({
+      next: (data: UserRegisterDTO) => {
+        if (data !== null) this.router.navigate(['welcome']);
+      },
+    });
+  }
 }
