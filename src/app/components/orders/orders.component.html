@@ -8,10 +8,10 @@
   <form (ngSubmit)="submitOrder()" [formGroup]="orderForm" class="mainflex">
     <div class="subflex">
       <label class="darktext">Stockname</label>
-      <select formControlName="stockname">
+      <select formControlName="stockname" (change)="checkTypesPossible($event)">
         <option value="" disabled>-- Choose stock --</option>
         @for(stock of stockNamesAndPrices(); track stock) {
-        <option [value]="stock.StockName">{{ stock.StockName }}</option>
+        <option [value]="stock.stockName">{{ stock.stockName }}</option>
         }
       </select>
     </div>
@@ -78,17 +78,17 @@
       <tbody>
         @for (order of orders; track $index) { @if(order) {
         <tr>
-          <td class="align-left">{{ order.StockName }}</td>
+          <td class="align-left">{{ order.stockName }}</td>
           <td class="align-left">
-            {{ order.OrderDate | date : "d MMMM yyyy, h:mm a" }}
+            {{ order.orderDate | date : "d MMMM yyyy, h:mm a" }}
           </td>
-          <td class="align-left">{{ order.Type }}</td>
+          <td class="align-left">{{ order.type }}</td>
           <td class="align-right font-bold">
-            {{ order.Price | number : "1.2-2" }} $
+            {{ order.price | number : "1.2-2" }} $
           </td>
-          <td class="align-right font-bold">{{ order.Amount }}</td>
+          <td class="align-right font-bold">{{ order.amount }}</td>
           <td class="align-right font-bold">
-            {{ order.Total | number : "1.2-2" }} $
+            {{ order.total | number : "1.2-2" }} $
           </td>
         </tr>
         } }

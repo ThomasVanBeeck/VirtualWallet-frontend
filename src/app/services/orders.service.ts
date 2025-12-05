@@ -5,13 +5,14 @@ import { environment } from '../../environments/environment';
 import { OrderDTO, OrderPostDTO, OrdersPaginatedDTO } from '../DTOs/OrderDTOs';
 import { catchError, Observable, of, throwError } from 'rxjs';
 import { WalletService } from './wallet.service';
+import { HoldingSummaryDTO } from '../DTOs/HoldingDTOs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OrdersService {
   constructor() {
-    this.createMockData(12);
+    this.createMockData(6);
   }
 
   http = inject(HttpClient);
@@ -21,21 +22,21 @@ export class OrdersService {
   private apiUrl = environment.apiUrl;
 
   mockOrder1: OrderDTO = {
-    StockName: 'Tesla',
-    OrderDate: new Date().toISOString(),
-    Type: 'Buy',
-    Price: 123.45,
-    Amount: 5,
-    Total: 123.45 * 5,
+    stockName: 'Tesla',
+    orderDate: new Date().toISOString(),
+    type: 'Buy',
+    price: 123.45,
+    amount: 5,
+    total: 123.45 * 5,
   };
 
   mockOrder2: OrderDTO = {
-    StockName: 'Bitcoin',
-    OrderDate: new Date().toISOString(),
-    Type: 'Sell',
-    Price: 234.56,
-    Amount: 3,
-    Total: 234.56 * 3,
+    stockName: 'Bitcoin',
+    orderDate: new Date().toISOString(),
+    type: 'Sell',
+    price: 234.56,
+    amount: 3,
+    total: 234.56 * 3,
   };
 
   mockOrderList: OrderDTO[] = [];
@@ -47,19 +48,19 @@ export class OrdersService {
       if (randomAmount % 2 == 0) randomType = 'Buy';
       const order1: OrderDTO = {
         ...this.mockOrder1,
-        OrderDate: new Date().toISOString(),
-        Price: this.mockOrder1.Price + i * 0.1,
-        Amount: randomAmount,
-        Type: randomType,
-        Total: (this.mockOrder1.Price + i * 0.1) * randomAmount,
+        orderDate: new Date().toISOString(),
+        price: this.mockOrder1.price + i * 0.1,
+        amount: randomAmount,
+        type: randomType,
+        total: (this.mockOrder1.price + i * 0.1) * randomAmount,
       };
       const order2: OrderDTO = {
         ...this.mockOrder2,
-        OrderDate: new Date().toISOString(),
-        Price: this.mockOrder2.Price - i * 0.1,
-        Amount: randomAmount,
-        Type: randomType,
-        Total: (this.mockOrder2.Price - i * 0.1) * randomAmount,
+        orderDate: new Date().toISOString(),
+        price: this.mockOrder2.price - i * 0.1,
+        amount: randomAmount,
+        type: randomType,
+        total: (this.mockOrder2.price - i * 0.1) * randomAmount,
       };
 
       this.mockOrderList.push(order1);
@@ -88,9 +89,9 @@ export class OrdersService {
         } else orders = this.mockOrderList.slice(startIndex, startIndex + size);
 
         const ordersPaginatedDTO: OrdersPaginatedDTO = {
-          Orders: orders,
-          PageNumber: page,
-          TotalPages: totalPages,
+          orders: orders,
+          pageNumber: page,
+          totalPages: totalPages,
         };
         return of(ordersPaginatedDTO);
       }
@@ -116,30 +117,48 @@ export class OrdersService {
 
   public postOrder(orderPostDTO: OrderPostDTO): Observable<void> {
     if (environment.mockApi) {
-      const orderCashTotal = orderPostDTO.Price * orderPostDTO.Amount;
+      const orderCashTotal = orderPostDTO.price * orderPostDTO.amount;
       if (
-        this.walletService.mockWallet.TotalCash < orderCashTotal &&
-        orderPostDTO.Type === 'Buy'
+        this.walletService.mockWallet.totalCash < orderCashTotal &&
+        orderPostDTO.type === 'Buy'
       )
         return throwError(
           () => new Error('Insufficient amount of cash available.')
         );
       if (this.authService.isMockLoggedIn) {
         const newOrder: OrderDTO = {
-          StockName: orderPostDTO.StockName,
-          OrderDate: '2025-11-20T08:00:00Z',
-          Type: orderPostDTO.Type,
-          Price: orderPostDTO.Price,
-          Amount: orderPostDTO.Amount,
-          Total: orderCashTotal,
+          stockName: orderPostDTO.stockName,
+          orderDate: '2025-11-20T08:00:00Z',
+          type: orderPostDTO.type,
+          price: orderPostDTO.price,
+          amount: orderPostDTO.amount,
+          total: orderCashTotal,
         };
         this.mockOrderList.unshift(newOrder);
-        if (orderPostDTO.Type === 'Buy')
-          this.walletService.mockWallet.TotalCash -=
-            orderPostDTO.Price * orderPostDTO.Amount;
+
+        if (
+          !this.walletService.mockWallet.holdings.some(
+            (holding) => holding.stockName == orderPostDTO.stockName
+          )
+        ) {
+          const newMockHolding: HoldingSummaryDTO = {
+            stockName: orderPostDTO.stockName,
+            amount: orderPostDTO.amount,
+            avgPrice: orderPostDTO.price,
+            currentPrice: orderPostDTO.price,
+            totalValue: orderCashTotal,
+            totalProfit: 0,
+            winLossPct: 0,
+          };
+          this.walletService.mockWallet.holdings.push(newMockHolding);
+        }
+
+        if (orderPostDTO.type === 'Buy')
+          this.walletService.mockWallet.totalCash -=
+            orderPostDTO.price * orderPostDTO.amount;
         else
-          this.walletService.mockWallet.TotalCash +=
-            orderPostDTO.Price * orderPostDTO.Amount;
+          this.walletService.mockWallet.totalCash +=
+            orderPostDTO.price * orderPostDTO.amount;
 
         return of(void 0);
       }

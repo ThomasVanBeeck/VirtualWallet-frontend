@@ -12,7 +12,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MarketDataService } from '../../services/market-data.service';
 import { commaToDot } from '../../validators/commatodot.validator';
-import { HoldingNamePriceDTO } from '../../DTOs/HoldingDTOs';
+import { HoldingNamePriceDTO, HoldingSummaryDTO } from '../../DTOs/HoldingDTOs';
 import { WalletService } from '../../services/wallet.service';
 import { WalletSummaryDTO } from '../../DTOs/WalletDTOs';
 
@@ -42,8 +42,8 @@ export class OrdersComponent {
 
       if (!selectedStock || stocks.length == 0) return;
 
-      const stock = stocks.find((stock) => stock.StockName === selectedStock);
-      if (stock) this.priceCtrl.setValue(stock.CurrentPrice.toString());
+      const stock = stocks.find((stock) => stock.stockName === selectedStock);
+      if (stock) this.priceCtrl.setValue(stock.currentPrice.toString());
     });
 
     effect(() => {
@@ -78,8 +78,15 @@ export class OrdersComponent {
   );
 
   protected readonly totalCash: Signal<number> = toSignal(
-    this.wallet$.pipe(map((wallet) => wallet.TotalCash)),
+    this.wallet$.pipe(map((wallet) => wallet.totalCash)),
     { initialValue: 0 }
+  );
+
+  protected readonly holdings: Signal<HoldingSummaryDTO[]> = toSignal(
+    this.wallet$.pipe(map((wallet) => wallet.holdings)),
+    {
+      initialValue: [],
+    }
   );
 
   private ordersInfo$: Observable<OrdersPaginatedDTO> = toObservable(
@@ -97,8 +104,8 @@ export class OrdersComponent {
         return stocks.map(
           (stock) =>
             ({
-              StockName: stock.stockName,
-              CurrentPrice: stock.pricePerShare,
+              stockName: stock.stockName,
+              currentPrice: stock.pricePerShare,
             } as HoldingNamePriceDTO)
         );
       })
@@ -107,16 +114,16 @@ export class OrdersComponent {
   );
 
   orders: Signal<OrderDTO[]> = toSignal(
-    this.ordersInfo$.pipe(map((info) => info.Orders)),
+    this.ordersInfo$.pipe(map((info) => info.orders)),
     { initialValue: [] }
   );
   pageNumber: Signal<number> = toSignal(
-    this.ordersInfo$.pipe(map((info) => info.PageNumber)),
+    this.ordersInfo$.pipe(map((info) => info.pageNumber)),
     { initialValue: 1 }
   );
 
   totalPages: Signal<number> = toSignal(
-    this.ordersInfo$.pipe(map((info) => info.TotalPages)),
+    this.ordersInfo$.pipe(map((info) => info.totalPages)),
     { initialValue: 1 }
   );
 
@@ -161,6 +168,21 @@ export class OrdersComponent {
     this.refreshTrigger.update((value) => value + 1);
   }
 
+  checkTypesPossible(event: Event): void {
+    console.log('check types possible triggered.');
+    const selectedStockName = (event.target as HTMLSelectElement).value;
+    const hasStock: boolean = this.holdings().some((holding) => {
+      return holding.stockName === selectedStockName;
+    });
+    if (hasStock) {
+      console.log('setting buy and sell');
+      this.orderTypes.set(['Buy', 'Sell']);
+    } else {
+      console.log('setting buy only');
+      this.orderTypes.set(['Buy']);
+    }
+  }
+
   submitOrder(): void {
     if (this.orderForm.invalid) {
       this.orderForm.markAllAsTouched();
@@ -170,10 +192,10 @@ export class OrdersComponent {
     this.orderStatus.set('Connecting...');
 
     const orderPostDTO: OrderPostDTO = {
-      StockName: this.stocknameCtrl.value!.toString(),
-      Type: this.typeCtrl.value!.toString(),
-      Price: Number(this.priceCtrl.value),
-      Amount: Number(this.amountCtrl.value),
+      stockName: this.stocknameCtrl.value!.toString(),
+      type: this.typeCtrl.value!.toString(),
+      price: Number(this.priceCtrl.value),
+      amount: Number(this.amountCtrl.value),
     };
 
     if (environment.mockApi) {

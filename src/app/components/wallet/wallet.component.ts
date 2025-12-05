@@ -1,7 +1,7 @@
 import { Component, effect, inject, signal, Signal } from '@angular/core';
 import { TransferDTO, TransferSummaryDTO } from '../../DTOs/TransferDTOs';
 import { WalletService } from '../../services/wallet.service';
-import { map, Observable, switchMap } from 'rxjs';
+import { map, Observable, switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { HoldingSummaryDTO } from '../../DTOs/HoldingDTOs';
 import { DatePipe, DecimalPipe } from '@angular/common';
@@ -18,9 +18,10 @@ import { commaToDot } from '../../validators/commatodot.validator';
 })
 export class WalletComponent {
   constructor() {
-    if (environment.mockApi) {
+    {
       effect(() => {
-        console.log('refreshing wallet content', this.refreshTrigger());
+        const nothing = this.refreshTrigger();
+        if (environment.mockApi) console.log('refreshing wallet content');
       });
     }
     effect(() => {
@@ -28,6 +29,12 @@ export class WalletComponent {
       if (this.transferForm.dirty) {
         this.transferStatus.set('');
       }
+    });
+    effect(() => {
+      const nothing = this.walletTotals();
+      if (this.walletTotals().TotalCash <= 0)
+        this.transferTypes.set(['Deposit']);
+      else this.transferTypes.set(['Deposit', 'Withdrawal']);
     });
   }
 
@@ -43,38 +50,39 @@ export class WalletComponent {
   private wallet$: Observable<WalletSummaryDTO> = toObservable(
     this.refreshTrigger
   ).pipe(
+    tap(() => this.walletService.emptyWalletCache()),
     switchMap(() =>
       this.walletService.getWallet(this.paramPage(), this.paramSize())
     )
   );
 
   transfers: Signal<TransferSummaryDTO[]> = toSignal(
-    this.wallet$.pipe(map((wallet) => wallet.TransferPage.Transfers)),
+    this.wallet$.pipe(map((wallet) => wallet.transferPage.transfers)),
     { initialValue: [] }
   );
 
   holdings: Signal<HoldingSummaryDTO[]> = toSignal(
-    this.wallet$.pipe(map((wallet) => wallet.Holdings)),
+    this.wallet$.pipe(map((wallet) => wallet.holdings)),
     { initialValue: [] }
   );
 
   pageNumber: Signal<number> = toSignal(
-    this.wallet$.pipe(map((wallet) => wallet.TransferPage.PageNumber)),
+    this.wallet$.pipe(map((wallet) => wallet.transferPage.pageNumber)),
     { initialValue: 1 }
   );
 
   totalPages: Signal<number> = toSignal(
-    this.wallet$.pipe(map((wallet) => wallet.TransferPage.TotalPages)),
+    this.wallet$.pipe(map((wallet) => wallet.transferPage.totalPages)),
     { initialValue: 1 }
   );
 
   walletTotals: Signal<WalletTotalDTO> = toSignal(
     this.wallet$.pipe(
       map((walletSummary) => ({
-        TotalCash: walletSummary.TotalCash,
-        TotalValue: walletSummary.TotalValue,
-        TotalProfit: walletSummary.TotalProfit,
-        WinLossPct: walletSummary.WinLossPct,
+        TotalCash: walletSummary.totalCash,
+        TotalValue: walletSummary.totalInStocks,
+        TotalProfit: walletSummary.totalProfit,
+        WinLossPct: walletSummary.winLossPct,
       }))
     ),
     {
@@ -117,8 +125,8 @@ export class WalletComponent {
     this.transferStatus.set('Connecting...');
 
     const transferDTO: TransferDTO = {
-      Amount: Number(this.amountCtrl.value),
-      Type: this.typeCtrl.value!.toString(),
+      amount: Number(this.amountCtrl.value),
+      type: this.typeCtrl.value!.toString(),
     };
 
     if (environment.mockApi) {

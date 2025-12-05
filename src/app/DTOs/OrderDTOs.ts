@@ -1,21 +1,21 @@
 export interface OrderDTO {
-  StockName: string;
-  OrderDate: string;
-  Type: string;
-  Price: number;
-  Amount: number;
-  Total: number;
+  stockName: string;
+  orderDate: string;
+  type: string;
+  price: number;
+  amount: number;
+  total: number;
 }
 
 export interface OrdersPaginatedDTO {
-  Orders: OrderDTO[];
-  PageNumber: number;
-  TotalPages: number;
+  orders: OrderDTO[];
+  pageNumber: number;
+  totalPages: number;
 }
 
 export interface OrderPostDTO {
-  StockName: string;
-  Type: string;
-  Price: number;
-  Amount: number;
+  stockName: string;
+  type: string;
+  price: number;
+  amount: number;
 }

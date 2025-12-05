@@ -36,8 +36,7 @@
   </form>
   <p class="form-footer min-p">{{ transferStatus() }}</p>
   <h2>Cash Balance</h2>
-
-  @if(transfers(); as transfers) {
+  @if(transfers().length > 0) { @if(transfers(); as transfers) {
   <div class="table-5rows-wrapper">
     <table>
       <thead>
@@ -50,18 +49,20 @@
       <tbody>
         @for (transfer of transfers; track $index) {
         <tr>
-          <td class="align-left">{{ transfer.Type }}</td>
+          <td class="align-left">{{ transfer.type }}</td>
           <td class="align-left">
-            {{ transfer.Date | date : "d MMMM yyyy, h:mm a" }}
+            {{ transfer.date | date : "d MMMM yyyy, h:mm a" }}
           </td>
           <td class="align-right font-bold">
-            {{ transfer.Amount | number : "1.2-2" }} $
+            {{ transfer.amount | number : "1.2-2" }} $
           </td>
         </tr>
         }
       </tbody>
     </table>
   </div>
+  } } @else {
+  <p class="darktext">No cash transfers yet.</p>
   } @if(totalPages(); as tp) { @if (tp > 1 ) {
   <div class="pagination">
     <button
@@ -80,11 +81,11 @@
     </button>
     @if(pageNumber() != 1) {
     <button class="pagebutton" (click)="setPageNumber(1)">1</button>
-    } @if ((tp > 3 && pageNumber() != 2) && pageNumber() != 1 ) {
+    } @if ((tp > 2 && pageNumber() != 2) && pageNumber() != 1 ) {
     <span class="darktext">...</span>
-    } @if (tp >= 3) {
+    } @if (tp >= 2) {
     <span class="activepage">{{ pageNumber() }}</span>
-    } @if ((tp > 3 && (pageNumber()+1) != totalPages()) && pageNumber() !=
+    } @if ((tp > 2 && (pageNumber()+1) != totalPages()) && pageNumber() !=
     totalPages()) {
     <span class="darktext">...</span>
     } @if (pageNumber() != totalPages()) {
@@ -129,7 +130,7 @@
   }
   <h2>Holdings</h2>
 
-  @if(holdings(); as holdings) {
+  @if (holdings.length > 0) { @if(holdings(); as holdings) {
   <table>
     <thead>
       <th class="align-left">Name</th>
@@ -141,24 +142,26 @@
     <tbody>
       @for (holding of holdings; track $index) { @if(holding) {
       <tr>
-        <td class="align-left">{{ holding.StockName }}</td>
-        <td class="align-left">{{ holding.Amount }}</td>
+        <td class="align-left">{{ holding.stockName }}</td>
+        <td class="align-left">{{ holding.amount }}</td>
         <td class="align-right font-bold">
-          {{ holding.AvgPrice | number : "1.2-2" }} $
+          {{ holding.avgPrice | number : "1.2-2" }} $
         </td>
         <td class="align-right font-bold">
-          {{ holding.TotalValue | number : "1.2-2" }} $
+          {{ holding.totalValue | number : "1.2-2" }} $
         </td>
         <td
           class="align-right font-bold"
-          [class.green-stock]="holding.WinLossPct > 0"
-          [class.red-stock]="holding.WinLossPct < 0"
+          [class.green-stock]="holding.winLossPct > 0"
+          [class.red-stock]="holding.winLossPct < 0"
         >
-          {{ holding.WinLossPct | number : "1.2-2" }} %
+          {{ holding.winLossPct | number : "1.2-2" }} %
         </td>
       </tr>
       } }
     </tbody>
   </table>
+  } } @else {
+  <p class="darktext">No holdings yet.</p>
   }
 </div>

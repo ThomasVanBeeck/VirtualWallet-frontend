@@ -1,16 +1,16 @@
 export interface TransferDTO {
-    Amount: number,
-    Type: string
+  amount: number;
+  type: string;
 }
 
 export interface TransferSummaryDTO {
-    Amount: number,
-    Date: string,
-    Type: string
+  amount: number;
+  date: string;
+  type: string;
 }
 
 export interface TransfersPaginatedDTO {
-    Transfers: TransferSummaryDTO[];
-    PageNumber: number;
-    TotalPages: number;
+  transfers: TransferSummaryDTO[];
+  pageNumber: number;
+  totalPages: number;
 }

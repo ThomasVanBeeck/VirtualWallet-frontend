@@ -1,18 +1,18 @@
-import { HoldingSummaryDTO } from "./HoldingDTOs";
-import { TransfersPaginatedDTO, TransferSummaryDTO } from "./TransferDTOs";
+import { HoldingSummaryDTO } from './HoldingDTOs';
+import { TransfersPaginatedDTO, TransferSummaryDTO } from './TransferDTOs';
 
 export interface WalletSummaryDTO {
-    TransferPage: TransfersPaginatedDTO,
-    Holdings: HoldingSummaryDTO[]
-    TotalCash: number,
-    TotalValue: number,
-    TotalProfit: number,
-    WinLossPct: number
+  transferPage: TransfersPaginatedDTO;
+  holdings: HoldingSummaryDTO[];
+  totalCash: number;
+  totalInStocks: number;
+  totalProfit: number;
+  winLossPct: number;
 }
 
 export interface WalletTotalDTO {
-    TotalCash: number,
-    TotalValue: number,
-    TotalProfit: number,
-    WinLossPct: number    
+  TotalCash: number;
+  TotalValue: number;
+  TotalProfit: number;
+  WinLossPct: number;
 }
