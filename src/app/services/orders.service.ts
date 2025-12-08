@@ -12,7 +12,7 @@ import { HoldingSummaryDTO } from '../DTOs/HoldingDTOs';
 })
 export class OrdersService {
   constructor() {
-    this.createMockData(6);
+    if (environment.mockApi) this.createMockData(6);
   }
 
   http = inject(HttpClient);
@@ -23,7 +23,7 @@ export class OrdersService {
 
   mockOrder1: OrderDTO = {
     stockName: 'Tesla',
-    orderDate: new Date().toISOString(),
+    date: new Date().toISOString(),
     type: 'Buy',
     price: 123.45,
     amount: 5,
@@ -32,7 +32,7 @@ export class OrdersService {
 
   mockOrder2: OrderDTO = {
     stockName: 'Bitcoin',
-    orderDate: new Date().toISOString(),
+    date: new Date().toISOString(),
     type: 'Sell',
     price: 234.56,
     amount: 3,
@@ -42,13 +42,15 @@ export class OrdersService {
   mockOrderList: OrderDTO[] = [];
 
   private createMockData(numSets: number): void {
+    if (!environment.mockApi) return;
+
     for (let i = 0; i < numSets; i++) {
       const randomAmount: number = Math.floor(Math.random() * 10 + 1);
       let randomType: string = 'Sell';
       if (randomAmount % 2 == 0) randomType = 'Buy';
       const order1: OrderDTO = {
         ...this.mockOrder1,
-        orderDate: new Date().toISOString(),
+        date: new Date().toISOString(),
         price: this.mockOrder1.price + i * 0.1,
         amount: randomAmount,
         type: randomType,
@@ -56,7 +58,7 @@ export class OrdersService {
       };
       const order2: OrderDTO = {
         ...this.mockOrder2,
-        orderDate: new Date().toISOString(),
+        date: new Date().toISOString(),
         price: this.mockOrder2.price - i * 0.1,
         amount: randomAmount,
         type: randomType,
@@ -78,7 +80,6 @@ export class OrdersService {
 
       if (this.authService.isMockLoggedIn) {
         const startIndex = (page - 1) * size;
-        const endIndex = page * size;
         const totalItems = this.mockOrderList.length;
         let totalPages: number = Math.ceil(totalItems / size);
 
@@ -102,7 +103,7 @@ export class OrdersService {
       parameters = parameters.set('size', size.toString());
 
       return this.http
-        .get<OrdersPaginatedDTO>(`${this.apiUrl}/order/all`, {
+        .get<OrdersPaginatedDTO>(`${this.apiUrl}/order`, {
           params: parameters,
           withCredentials: true,
         })
@@ -128,7 +129,7 @@ export class OrdersService {
       if (this.authService.isMockLoggedIn) {
         const newOrder: OrderDTO = {
           stockName: orderPostDTO.stockName,
-          orderDate: '2025-11-20T08:00:00Z',
+          date: '2025-11-20T08:00:00Z',
           type: orderPostDTO.type,
           price: orderPostDTO.price,
           amount: orderPostDTO.amount,
@@ -144,7 +145,6 @@ export class OrdersService {
           const newMockHolding: HoldingSummaryDTO = {
             stockName: orderPostDTO.stockName,
             amount: orderPostDTO.amount,
-            avgPrice: orderPostDTO.price,
             currentPrice: orderPostDTO.price,
             totalValue: orderCashTotal,
             totalProfit: 0,
@@ -163,9 +163,11 @@ export class OrdersService {
         return of(void 0);
       }
       return throwError(() => new Error('Mock postOrder failed.'));
-    } else {
+    }
+    // End of Mocking
+    else {
       return this.http
-        .post<void>(`${this.apiUrl}/order/submit`, orderPostDTO, {
+        .post<void>(`${this.apiUrl}/order`, orderPostDTO, {
           withCredentials: true,
         })
         .pipe(

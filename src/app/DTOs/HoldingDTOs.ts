@@ -6,7 +6,6 @@ export interface HoldingNamePriceDTO {
 export interface HoldingSummaryDTO {
   stockName: string;
   amount: number;
-  avgPrice: number;
   currentPrice: number;
   totalValue: number;
   totalProfit: number;

@@ -8,7 +8,7 @@
   <form (ngSubmit)="submitOrder()" [formGroup]="orderForm" class="mainflex">
     <div class="subflex">
       <label class="darktext">Stockname</label>
-      <select formControlName="stockname" (change)="checkTypesPossible($event)">
+      <select formControlName="stockname">
         <option value="" disabled>-- Choose stock --</option>
         @for(stock of stockNamesAndPrices(); track stock) {
         <option [value]="stock.stockName">{{ stock.stockName }}</option>
@@ -19,8 +19,9 @@
       <label class="darktext">Buy/Sell</label>
       <select formControlName="type">
         <option value="" disabled>-- Choose action --</option>
-        @for(type of orderTypes(); track type) {
-        <option [value]="type">{{ type }}</option>
+        <option value="Buy">Buy</option>
+        @if(canSell()) {
+        <option value="Sell">Sell</option>
         }
       </select>
     </div>
@@ -64,7 +65,7 @@
   <p class="form-footer min-p">{{ orderStatus() }}</p>
   <h2>History</h2>
 
-  @if (orders(); as orders) {
+  @if(orders().length > 0) { @if (orders(); as orders) {
   <div class="table-5rows-wrapper">
     <table>
       <thead>
@@ -80,7 +81,7 @@
         <tr>
           <td class="align-left">{{ order.stockName }}</td>
           <td class="align-left">
-            {{ order.orderDate | date : "d MMMM yyyy, h:mm a" }}
+            {{ order.date | date : "d MMMM yyyy, h:mm a" }}
           </td>
           <td class="align-left">{{ order.type }}</td>
           <td class="align-right font-bold">
@@ -95,6 +96,8 @@
       </tbody>
     </table>
   </div>
+  } } @else {
+  <p class="darktext">No orders yet.</p>
   } @if(totalPages(); as tp) { @if (tp > 1 ) {
   <div class="pagination">
     <button
@@ -113,11 +116,11 @@
     </button>
     @if(pageNumber() != 1) {
     <button class="pagebutton" (click)="setPageNumber(1)">1</button>
-    } @if ((tp > 3 && pageNumber() != 2) && pageNumber() != 1 ) {
+    } @if ((tp > 2 && pageNumber() != 2) && pageNumber() != 1 ) {
     <span class="darktext">...</span>
-    } @if (tp >= 3) {
+    } @if (tp >= 2) {
     <span class="activepage">{{ pageNumber() }}</span>
-    } @if ((tp > 3 && (pageNumber()+1) != totalPages()) && pageNumber() !=
+    } @if ((tp > 2 && (pageNumber()+1) != totalPages()) && pageNumber() !=
     totalPages()) {
     <span class="darktext">...</span>
     } @if (pageNumber() != totalPages()) {

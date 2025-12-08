@@ -65,20 +65,23 @@ export class MarketDataService {
       }
       return throwError(() => new Error('Mock getStockData failed.'));
     } else {
-      return this.http
-        .get<StockModel[]>(`${this.apiUrl}/stock/all`, {
-          withCredentials: true,
-        })
-        .pipe(
-          tap((dataList) => {
-            this.sessionstorage.setItem(this.STOCKDATA_CACHE_KEY, dataList);
-            console.log(dataList);
-          }),
-          catchError((err) => {
-            console.error('getStockData API error: ', err);
-            return throwError(() => err);
+      if (cachedList) return of(cachedList);
+      else {
+        return this.http
+          .get<StockModel[]>(`${this.apiUrl}/stock/all`, {
+            withCredentials: true,
           })
-        );
+          .pipe(
+            tap((dataList) => {
+              this.sessionstorage.setItem(this.STOCKDATA_CACHE_KEY, dataList);
+              console.log(dataList);
+            }),
+            catchError((err) => {
+              console.error('getStockData API error: ', err);
+              return throwError(() => err);
+            })
+          );
+      }
     }
   }
 }

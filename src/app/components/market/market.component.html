@@ -21,7 +21,7 @@
         </td>
         <td
           class="align-right font-bold"
-          [class.green-stock]="stock.changePct24Hr > 0"
+          [class.green-stock]="stock.changePct24Hr >= 0"
           [class.red-stock]="stock.changePct24Hr < 0"
         >
           {{ stock.changePct24Hr | number : "1.2-2" }} %

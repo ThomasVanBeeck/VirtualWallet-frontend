@@ -77,8 +77,8 @@ h2 {
   font-size: 1.55rem;
   color: var(--background-dark);
   padding: 0rem;
-  margin-top: 0.6rem;
-  margin-bottom: 1rem;
+  margin-top: 1.3rem;
+  margin-bottom: 0.7rem;
 }
 
 .min-p {
@@ -264,6 +264,7 @@ select {
   height: 1.8rem;
   width: 100%;
   padding: 0.5rem;
+  padding-bottom: 0.25rem;
   transition: all 0.2s ease-in-out;
 }
 

@@ -1,6 +1,6 @@
 export interface OrderDTO {
   stockName: string;
-  orderDate: string;
+  date: string;
   type: string;
   price: number;
   amount: number;

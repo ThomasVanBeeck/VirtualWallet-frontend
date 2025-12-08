@@ -1,4 +1,11 @@
-import { Component, effect, inject, signal, Signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  Signal,
+} from '@angular/core';
 import { TransferDTO, TransferSummaryDTO } from '../../DTOs/TransferDTOs';
 import { WalletService } from '../../services/wallet.service';
 import { map, Observable, switchMap, tap } from 'rxjs';
@@ -64,6 +71,10 @@ export class WalletComponent {
   holdings: Signal<HoldingSummaryDTO[]> = toSignal(
     this.wallet$.pipe(map((wallet) => wallet.holdings)),
     { initialValue: [] }
+  );
+
+  showHoldings: Signal<boolean> = computed(() =>
+    this.holdings().some((holding) => holding.amount > 0)
   );
 
   pageNumber: Signal<number> = toSignal(

@@ -1,7 +1,14 @@
-import { Component, effect, inject, Signal, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  Signal,
+  signal,
+} from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { OrdersService } from '../../services/orders.service';
-import { map, Observable, switchMap } from 'rxjs';
+import { map, Observable, switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   OrderDTO,
@@ -64,7 +71,6 @@ export class OrdersComponent {
   protected readonly walletService = inject(WalletService);
 
   protected readonly orderStatus = signal<string>('');
-  protected readonly orderTypes = signal<string[]>(['Buy', 'Sell']);
   protected readonly refreshTrigger = signal(0);
   protected readonly paramPage = signal(1);
   protected readonly paramSize = signal(5);
@@ -72,6 +78,7 @@ export class OrdersComponent {
   private wallet$: Observable<WalletSummaryDTO> = toObservable(
     this.refreshTrigger
   ).pipe(
+    tap(() => this.walletService.emptyWalletCache()),
     switchMap(() =>
       this.walletService.getWallet(this.paramPage(), this.paramSize())
     )
@@ -168,20 +175,16 @@ export class OrdersComponent {
     this.refreshTrigger.update((value) => value + 1);
   }
 
-  checkTypesPossible(event: Event): void {
-    console.log('check types possible triggered.');
-    const selectedStockName = (event.target as HTMLSelectElement).value;
-    const hasStock: boolean = this.holdings().some((holding) => {
-      return holding.stockName === selectedStockName;
-    });
-    if (hasStock) {
-      console.log('setting buy and sell');
-      this.orderTypes.set(['Buy', 'Sell']);
-    } else {
-      console.log('setting buy only');
-      this.orderTypes.set(['Buy']);
-    }
-  }
+  protected readonly canSell: Signal<boolean> = computed(() => {
+    const holdings = this.holdings();
+    const selectedStock = this.selectedStockName();
+
+    if (!selectedStock) return false;
+
+    return holdings.some(
+      (holding) => holding.stockName === selectedStock && holding.amount > 0
+    );
+  });
 
   submitOrder(): void {
     if (this.orderForm.invalid) {
@@ -209,6 +212,7 @@ export class OrdersComponent {
         this.orderForm.reset();
         this.priceCtrl.setValue('');
         this.totalCtrl.setValue('');
+        this.typeCtrl.setValue('');
       },
       error: (err) => {
         this.orderStatus.set('Failed to submit new order.');

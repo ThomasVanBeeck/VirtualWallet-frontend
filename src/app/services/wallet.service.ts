@@ -45,7 +45,6 @@ export class WalletService {
   private mockHolding1: HoldingSummaryDTO = {
     stockName: 'TSLA',
     amount: 7,
-    avgPrice: 72.45,
     currentPrice: 99,
     totalValue: 693,
     totalProfit: 185.85,
@@ -64,6 +63,8 @@ export class WalletService {
   };
 
   private createMockData(num: number): void {
+    if (!environment.mockApi) return;
+
     const firstTransfer: TransferSummaryDTO = {
       date: new Date().toISOString(),
       amount: 50000,
@@ -130,7 +131,8 @@ export class WalletService {
         return of(this.mockWallet);
       }
       return throwError(() => new Error('Unauthorized, not mock logged in.'));
-    } else {
+    } // End of Mocking
+    else {
       let parameters = new HttpParams();
       parameters = parameters.set('page', page.toString());
       parameters = parameters.set('size', size.toString());
@@ -177,15 +179,18 @@ export class WalletService {
       }
       return throwError(() => new Error('Mock transfer failed.'));
     }
-    return this.http
-      .post<void>(`${this.apiUrl}/transfer`, transferDTO, {
-        withCredentials: true,
-      })
-      .pipe(
-        catchError((err) => {
-          console.error('getWallet API error:', err);
-          return throwError(() => new Error('Transfer failed.'));
+    // End of Mocking
+    else {
+      return this.http
+        .post<void>(`${this.apiUrl}/transfer`, transferDTO, {
+          withCredentials: true,
         })
-      );
+        .pipe(
+          catchError((err) => {
+            console.error('getWallet API error:', err);
+            return throwError(() => new Error('Transfer failed.'));
+          })
+        );
+    }
   }
 }
