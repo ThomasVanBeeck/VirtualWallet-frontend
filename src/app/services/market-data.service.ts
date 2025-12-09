@@ -1,10 +1,10 @@
-import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { catchError, Observable, of, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { StockModel } from '../models/stockmodel';
-import { SessionstorageService } from './sessionstorage.service';
+import { StockDto, StockUpdateDto } from '../DTOs/StockDTOs';
 import { AuthService } from './auth.service';
+import { SessionstorageService } from './sessionstorage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +16,9 @@ export class MarketDataService {
 
   private apiUrl = environment.apiUrl;
   private readonly STOCKDATA_CACHE_KEY = 'stockdata';
+  private readonly STOCKLASTUPDATE_CACHE_KEY = 'stocklastupdate';
 
-  private mockStockData1: StockModel = {
+  private mockStockData1: StockDto = {
     stockName: 'Bitcoin',
     type: 'Cryptocurrency',
     description: 'Largest cryptocurrency',
@@ -28,7 +29,7 @@ export class MarketDataService {
     investmentAmount: 13877.22,
   };
 
-  private mockStockData2: StockModel = {
+  private mockStockData2: StockDto = {
     stockName: 'Nvidia',
     type: 'stock',
     description: 'Big tech chip maker',
@@ -39,23 +40,84 @@ export class MarketDataService {
     investmentAmount: 666.66,
   };
 
-  private MockStockDataList: StockModel[] = [
+  private MockStockDataList: StockDto[] = [
     this.mockStockData1,
     this.mockStockData2,
   ];
 
-  public getStockData(): Observable<StockModel[]> {
-    const cachedList = this.sessionstorage.getItem<Array<StockModel>>(
+  private MockStockUpdate: StockUpdateDto = { lastUpdate: 'first value' };
+  private MockStockUpdateNewer: StockUpdateDto = {
+    lastUpdate: 'newer second value',
+  };
+
+  public emptyStockDataCache() {
+    this.sessionstorage.removeItem(this.STOCKDATA_CACHE_KEY);
+  }
+
+  public getLastUpdate(): Observable<StockUpdateDto> {
+    const cachedDate = this.sessionstorage.getItem<StockUpdateDto>(
+      this.STOCKLASTUPDATE_CACHE_KEY
+    );
+
+    if (environment.mockApi) {
+      if (this.authService.isMockLoggedIn) {
+        if (
+          cachedDate &&
+          cachedDate.lastUpdate == this.MockStockUpdateNewer.lastUpdate
+        ) {
+          console.log('Stock Last Update info retriever from session cache.');
+          return of(cachedDate);
+        } else if (
+          cachedDate &&
+          cachedDate.lastUpdate !== this.MockStockUpdateNewer.lastUpdate
+        ) {
+          this.sessionstorage.removeItem(this.STOCKDATA_CACHE_KEY);
+        } else {
+          console.log('Saving stock last update mock data to session storage.');
+        }
+        this.sessionstorage.setItem(
+          this.STOCKLASTUPDATE_CACHE_KEY,
+          this.MockStockUpdateNewer
+        );
+        return of(this.MockStockUpdateNewer);
+      }
+      return throwError(() => new Error('Mock getLastUpdate failed.'));
+    }
+
+    // Einde mocking
+    else {
+      return this.http
+        .get<StockUpdateDto>(`${this.apiUrl}/stock/lastupdate`, {
+          withCredentials: true,
+        })
+        .pipe(
+          tap((stockUpdateDto) => {
+            this.sessionstorage.setItem(
+              this.STOCKLASTUPDATE_CACHE_KEY,
+              stockUpdateDto
+            );
+            console.log(stockUpdateDto);
+          }),
+          catchError((err) => {
+            console.error('getStockUpdate API error: ', err);
+            return throwError(() => err);
+          })
+        );
+    }
+  }
+
+  public getStockData(): Observable<StockDto[]> {
+    const cachedList = this.sessionstorage.getItem<Array<StockDto>>(
       this.STOCKDATA_CACHE_KEY
     );
 
     if (environment.mockApi) {
       if (this.authService.isMockLoggedIn) {
         if (cachedList) {
-          console.log('StockModel data retrieved from session cache.');
+          console.log('Stock data retrieved from session cache.');
           return of(cachedList);
         } else {
-          console.log('Saving mock data to session storage.');
+          console.log('Saving stock mock data to session storage.');
           this.sessionstorage.setItem(
             this.STOCKDATA_CACHE_KEY,
             this.MockStockDataList
@@ -64,11 +126,12 @@ export class MarketDataService {
         }
       }
       return throwError(() => new Error('Mock getStockData failed.'));
-    } else {
+    } // Einde mocking
+    else {
       if (cachedList) return of(cachedList);
       else {
         return this.http
-          .get<StockModel[]>(`${this.apiUrl}/stock/all`, {
+          .get<StockDto[]>(`${this.apiUrl}/stock/all`, {
             withCredentials: true,
           })
           .pipe(

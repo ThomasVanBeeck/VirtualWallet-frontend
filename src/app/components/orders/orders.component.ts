@@ -1,3 +1,4 @@
+import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   Component,
   computed,
@@ -6,22 +7,22 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { environment } from '../../../environments/environment';
-import { OrdersService } from '../../services/orders.service';
-import { map, Observable, switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { map, Observable, switchMap, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { HoldingNamePriceDTO, HoldingSummaryDTO } from '../../DTOs/HoldingDTOs';
 import {
   OrderDTO,
   OrderPostDTO,
   OrdersPaginatedDTO,
 } from '../../DTOs/OrderDTOs';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { MarketDataService } from '../../services/market-data.service';
-import { commaToDot } from '../../validators/commatodot.validator';
-import { HoldingNamePriceDTO, HoldingSummaryDTO } from '../../DTOs/HoldingDTOs';
-import { WalletService } from '../../services/wallet.service';
+import { StockDto, StockUpdateDto } from '../../DTOs/StockDTOs';
 import { WalletSummaryDTO } from '../../DTOs/WalletDTOs';
+import { MarketDataService } from '../../services/market-data.service';
+import { OrdersService } from '../../services/orders.service';
+import { WalletService } from '../../services/wallet.service';
+import { commaToDot } from '../../validators/commatodot.validator';
 
 @Component({
   selector: 'app-orders',
@@ -104,8 +105,21 @@ export class OrdersComponent {
     )
   );
 
+  stockLastUpdate: Signal<StockUpdateDto> = toSignal(
+    this.marketDataService.getLastUpdate(),
+    {
+      initialValue: { lastUpdate: '' },
+    }
+  );
+  private stockNamesAndPricesObservable$: Observable<StockDto[]> = toObservable(
+    this.stockLastUpdate
+  ).pipe(
+    tap(() => this.marketDataService.emptyStockDataCache()),
+    switchMap(() => this.marketDataService.getStockData())
+  );
+
   stockNamesAndPrices: Signal<HoldingNamePriceDTO[]> = toSignal(
-    this.marketDataService.getStockData().pipe(
+    this.stockNamesAndPricesObservable$.pipe(
       map((stocks) => {
         if (!stocks) return [];
         return stocks.map(

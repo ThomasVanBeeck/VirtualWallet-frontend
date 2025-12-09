@@ -1,11 +1,11 @@
-import { inject, Injectable } from '@angular/core';
-import { AuthService } from './auth.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { OrderDTO, OrderPostDTO, OrdersPaginatedDTO } from '../DTOs/OrderDTOs';
+import { inject, Injectable } from '@angular/core';
 import { catchError, Observable, of, throwError } from 'rxjs';
-import { WalletService } from './wallet.service';
+import { environment } from '../../environments/environment';
 import { HoldingSummaryDTO } from '../DTOs/HoldingDTOs';
+import { OrderDTO, OrderPostDTO, OrdersPaginatedDTO } from '../DTOs/OrderDTOs';
+import { AuthService } from './auth.service';
+import { WalletService } from './wallet.service';
 
 @Injectable({
   providedIn: 'root',
@@ -97,7 +97,8 @@ export class OrdersService {
         return of(ordersPaginatedDTO);
       }
       return throwError(() => new Error('Mock getOrderHistory failed.'));
-    } else {
+    } // Einde mocking
+    else {
       let parameters = new HttpParams();
       parameters = parameters.set('page', page.toString());
       parameters = parameters.set('size', size.toString());
@@ -164,7 +165,7 @@ export class OrdersService {
       }
       return throwError(() => new Error('Mock postOrder failed.'));
     }
-    // End of Mocking
+    // Einde mocking
     else {
       return this.http
         .post<void>(`${this.apiUrl}/order`, orderPostDTO, {

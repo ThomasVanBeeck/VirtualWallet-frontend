@@ -1,3 +1,4 @@
+import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   Component,
   computed,
@@ -6,15 +7,14 @@ import {
   signal,
   Signal,
 } from '@angular/core';
-import { TransferDTO, TransferSummaryDTO } from '../../DTOs/TransferDTOs';
-import { WalletService } from '../../services/wallet.service';
-import { map, Observable, switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { HoldingSummaryDTO } from '../../DTOs/HoldingDTOs';
-import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { map, Observable, switchMap, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { HoldingSummaryDTO } from '../../DTOs/HoldingDTOs';
+import { TransferDTO, TransferSummaryDTO } from '../../DTOs/TransferDTOs';
 import { WalletSummaryDTO, WalletTotalDTO } from '../../DTOs/WalletDTOs';
+import { WalletService } from '../../services/wallet.service';
 import { commaToDot } from '../../validators/commatodot.validator';
 
 @Component({

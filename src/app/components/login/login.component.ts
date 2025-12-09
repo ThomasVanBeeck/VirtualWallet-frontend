@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { UserLoginDTO } from '../../DTOs/UserDTOs';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
