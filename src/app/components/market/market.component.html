@@ -16,9 +16,7 @@
         <td class="align-left">{{ stock.stockName }}</td>
         <td class="align-left">{{ stock.type }}</td>
         <td class="align-right">{{ stock.description }}</td>
-        <td class="align-right font-bold">
-          {{ stock.pricePerShare | number : "1.2-2" }} $
-        </td>
+        <td class="align-right font-bold">{{ stock.pricePerShare | number : "1.2-2" }} $</td>
         <td
           class="align-right font-bold"
           [class.green-stock]="stock.changePct24Hr >= 0"
@@ -31,4 +29,7 @@
     </tbody>
   </table>
   }
+  <p class="darktext">
+    <i> <b>Last Update: </b>{{ lastUpdate() | date : "d MMMM yyyy, h:mm a" }}</i>
+  </p>
 </div>

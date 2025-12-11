@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HoldingSummaryDto } from '../DTOs/HoldingDtos';
 import { OrderDto } from '../DTOs/OrderDtos';
+import { StockDto, StockUpdateDto } from '../DTOs/StockDtos';
 import { TransferSummaryDto } from '../DTOs/TransferDtos';
 import { UserRegisterDto } from '../DTOs/UserDtos';
 import { WalletSummaryDto } from '../DTOs/WalletDtos';
@@ -28,7 +29,7 @@ export class MockstateService {
 
   public isMockLoggedIn: boolean = false;
 
-  mockOrder1: OrderDto = {
+  public mockOrder1: OrderDto = {
     stockName: 'Tesla',
     date: new Date().toISOString(),
     type: 'Buy',
@@ -37,7 +38,7 @@ export class MockstateService {
     total: 123.45 * 5,
   };
 
-  mockOrder2: OrderDto = {
+  public mockOrder2: OrderDto = {
     stockName: 'Bitcoin',
     date: new Date().toISOString(),
     type: 'Sell',
@@ -46,9 +47,9 @@ export class MockstateService {
     total: 234.56 * 3,
   };
 
-  mockOrderList: OrderDto[] = [];
+  public mockOrderList: OrderDto[] = [];
 
-  private mockHolding1: HoldingSummaryDto = {
+  public mockHolding1: HoldingSummaryDto = {
     stockName: 'TSLA',
     amount: 7,
     currentPrice: 99,
@@ -78,6 +79,34 @@ export class MockstateService {
 
   public mockNewUsers: Array<UserRegisterDto> = [this.mockUser];
   public currentMockUser: UserRegisterDto | null = null;
+
+  public mockStockData1: StockDto = {
+    stockName: 'Bitcoin',
+    type: 'Cryptocurrency',
+    description: 'Largest cryptocurrency',
+    pricePerShare: 99123,
+    changePct24Hr: 12.34,
+    pctOfWallet: 77.77,
+    sharesAmount: 0.2,
+    investmentAmount: 13877.22,
+  };
+
+  public mockStockData2: StockDto = {
+    stockName: 'Nvidia',
+    type: 'stock',
+    description: 'Big tech chip maker',
+    pricePerShare: 201.06,
+    changePct24Hr: -2.34,
+    pctOfWallet: 22.23,
+    sharesAmount: 5,
+    investmentAmount: 666.66,
+  };
+
+  public MockStockDataList: StockDto[] = [this.mockStockData1, this.mockStockData2];
+
+  public MockStockUpdateNewer: StockUpdateDto = {
+    lastUpdate: new Date().toISOString(),
+  };
 
   private createOrderMockData(numSets: number): void {
     for (let i = 0; i < numSets; i++) {

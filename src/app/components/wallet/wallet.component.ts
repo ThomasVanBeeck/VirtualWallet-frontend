@@ -134,7 +134,6 @@ export class WalletComponent {
 
     this.walletService.postTransfer(transferDTO).subscribe({
       next: () => {
-        this.walletService.emptyWalletCache();
         this.refreshTrigger.update((value) => value + 1);
         this.transferStatus.set('Successfully transferred.');
         this.transferForm.reset();

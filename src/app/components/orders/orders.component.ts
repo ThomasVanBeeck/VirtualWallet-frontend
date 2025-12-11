@@ -24,15 +24,18 @@ export class OrdersComponent {
   constructor() {
     if (environment.mockApi) {
       effect(() => {
-        console.log('refreshing order content', this.refreshTrigger());
+        console.log('refreshing wallet content', this.walletRefreshTrigger());
       });
       effect(() => {
-        const _ = this.formChanges();
-        if (this.orderForm.dirty) {
-          this.orderStatus.set('');
-        }
+        console.log('refreshing order content', this.orderRefreshTrigger());
       });
     }
+    effect(() => {
+      const _ = this.formChanges();
+      if (this.orderForm.dirty) {
+        this.orderStatus.set('');
+      }
+    });
 
     effect(() => {
       const selectedStock = this.selectedStockName();
@@ -62,12 +65,13 @@ export class OrdersComponent {
   walletService = inject<IWalletService>(WALLET_SERVICE_TOKEN);
 
   protected readonly orderStatus = signal<string>('');
-  protected readonly refreshTrigger = signal(0);
+  protected readonly walletRefreshTrigger = signal(0);
+  protected readonly orderRefreshTrigger = signal(0);
   protected readonly paramPage = signal(1);
   protected readonly paramSize = signal(5);
 
-  private wallet$: Observable<WalletSummaryDto> = toObservable(this.refreshTrigger).pipe(
-    switchMap(() => this.walletService.getWallet(this.paramPage(), this.paramSize())),
+  private wallet$: Observable<WalletSummaryDto> = toObservable(this.walletRefreshTrigger).pipe(
+    switchMap(() => this.walletService.getWallet()),
     shareReplay(1)
   );
 
@@ -83,7 +87,7 @@ export class OrdersComponent {
     }
   );
 
-  private ordersInfo$: Observable<OrdersPaginatedDto> = toObservable(this.refreshTrigger).pipe(
+  private ordersInfo$: Observable<OrdersPaginatedDto> = toObservable(this.orderRefreshTrigger).pipe(
     switchMap(() => this.ordersService.getOrderHistory(this.paramPage(), this.paramSize())),
     shareReplay(1)
   );
@@ -93,7 +97,7 @@ export class OrdersComponent {
   });
 
   stockNamesAndPrices: Signal<HoldingNamePriceDto[]> = toSignal(
-    this.marketDataService.getStockData().pipe(
+    this.marketDataService.getStockDataWithUpdateCheck().pipe(
       map((stocks) => {
         if (!stocks) return [];
         return stocks.map(
@@ -154,7 +158,7 @@ export class OrdersComponent {
 
   setPageNumber(pagenr: number) {
     this.paramPage.set(pagenr);
-    this.refreshTrigger.update((value) => value + 1);
+    this.orderRefreshTrigger.update((value) => value + 1);
   }
 
   protected readonly canSell: Signal<boolean> = computed(() => {
@@ -187,8 +191,8 @@ export class OrdersComponent {
 
     this.ordersService.postOrder(orderPostDTO).subscribe({
       next: () => {
-        this.walletService.emptyWalletCache();
-        this.refreshTrigger.update((value) => value + 1);
+        this.walletRefreshTrigger.update((value) => value + 1);
+        this.orderRefreshTrigger.update((value) => value + 1);
         this.orderStatus.set('Successfully submitted new order.');
         this.orderForm.reset();
         this.priceCtrl.setValue('');

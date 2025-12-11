@@ -4,7 +4,6 @@ import { TransferDto, TransfersPaginatedDto, TransferSummaryDto } from '../DTOs/
 import { WalletSummaryDto } from '../DTOs/WalletDtos';
 import { IWalletService } from '../interfaces/i-wallet.service';
 import { MockstateService } from './mockstate.service';
-import { SessionstorageService } from './sessionstorage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,21 +12,8 @@ export class WalletmockService implements IWalletService {
   constructor() {}
 
   private mockstateService = inject(MockstateService);
-  private sessionstorage = inject(SessionstorageService);
 
-  private readonly WALLET_CACHE_KEY = 'wallet';
-
-  public emptyWalletCache(): void {
-    this.sessionstorage.removeItem(this.WALLET_CACHE_KEY);
-  }
-
-  public getWallet(page: number, size: number): Observable<WalletSummaryDto> {
-    const cachedWallet = this.sessionstorage.getItem<WalletSummaryDto>(this.WALLET_CACHE_KEY);
-
-    if (cachedWallet) {
-      return of(cachedWallet);
-    }
-
+  public getWallet(page: number = 1, size: number = 5): Observable<WalletSummaryDto> {
     console.log('mock getWallet');
     if (this.mockstateService.isMockLoggedIn) {
       const startIndex = (page - 1) * size;
