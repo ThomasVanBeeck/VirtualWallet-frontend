@@ -1,9 +1,9 @@
-export interface HoldingNamePriceDTO {
+export interface HoldingNamePriceDto {
   stockName: string;
   currentPrice: number;
 }
 
-export interface HoldingSummaryDTO {
+export interface HoldingSummaryDto {
   stockName: string;
   amount: number;
   currentPrice: number;

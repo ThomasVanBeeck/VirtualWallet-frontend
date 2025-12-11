@@ -1,27 +1,17 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  Signal,
-  signal,
-} from '@angular/core';
+import { Component, computed, effect, inject, Signal, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { map, Observable, switchMap, tap } from 'rxjs';
+import { map, Observable, shareReplay, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { HoldingNamePriceDTO, HoldingSummaryDTO } from '../../DTOs/HoldingDTOs';
-import {
-  OrderDTO,
-  OrderPostDTO,
-  OrdersPaginatedDTO,
-} from '../../DTOs/OrderDTOs';
-import { StockDto, StockUpdateDto } from '../../DTOs/StockDTOs';
-import { WalletSummaryDTO } from '../../DTOs/WalletDTOs';
-import { MarketDataService } from '../../services/market-data.service';
-import { OrdersService } from '../../services/orders.service';
-import { WalletService } from '../../services/wallet.service';
+import { HoldingNamePriceDto, HoldingSummaryDto } from '../../DTOs/HoldingDtos';
+import { OrderDto, OrderPostDto, OrdersPaginatedDto } from '../../DTOs/OrderDtos';
+import { StockUpdateDto } from '../../DTOs/StockDtos';
+import { WalletSummaryDto } from '../../DTOs/WalletDtos';
+import { IMarketDataService } from '../../interfaces/i-market-data.service';
+import { IOrdersService } from '../../interfaces/i-orders.service';
+import { IWalletService } from '../../interfaces/i-wallet.service';
+import { MARKETDATA_SERVICE_TOKEN, ORDERS_SERVICE_TOKEN, WALLET_SERVICE_TOKEN } from '../../tokens';
 import { commaToDot } from '../../validators/commatodot.validator';
 
 @Component({
@@ -67,22 +57,18 @@ export class OrdersComponent {
     });
   }
 
-  protected readonly ordersService = inject(OrdersService);
-  protected readonly marketDataService = inject(MarketDataService);
-  protected readonly walletService = inject(WalletService);
+  ordersService = inject<IOrdersService>(ORDERS_SERVICE_TOKEN);
+  marketDataService = inject<IMarketDataService>(MARKETDATA_SERVICE_TOKEN);
+  walletService = inject<IWalletService>(WALLET_SERVICE_TOKEN);
 
   protected readonly orderStatus = signal<string>('');
   protected readonly refreshTrigger = signal(0);
   protected readonly paramPage = signal(1);
   protected readonly paramSize = signal(5);
 
-  private wallet$: Observable<WalletSummaryDTO> = toObservable(
-    this.refreshTrigger
-  ).pipe(
-    tap(() => this.walletService.emptyWalletCache()),
-    switchMap(() =>
-      this.walletService.getWallet(this.paramPage(), this.paramSize())
-    )
+  private wallet$: Observable<WalletSummaryDto> = toObservable(this.refreshTrigger).pipe(
+    switchMap(() => this.walletService.getWallet(this.paramPage(), this.paramSize())),
+    shareReplay(1)
   );
 
   protected readonly totalCash: Signal<number> = toSignal(
@@ -90,36 +76,24 @@ export class OrdersComponent {
     { initialValue: 0 }
   );
 
-  protected readonly holdings: Signal<HoldingSummaryDTO[]> = toSignal(
+  protected readonly holdings: Signal<HoldingSummaryDto[]> = toSignal(
     this.wallet$.pipe(map((wallet) => wallet.holdings)),
     {
       initialValue: [],
     }
   );
 
-  private ordersInfo$: Observable<OrdersPaginatedDTO> = toObservable(
-    this.refreshTrigger
-  ).pipe(
-    switchMap(() =>
-      this.ordersService.getOrderHistory(this.paramPage(), this.paramSize())
-    )
+  private ordersInfo$: Observable<OrdersPaginatedDto> = toObservable(this.refreshTrigger).pipe(
+    switchMap(() => this.ordersService.getOrderHistory(this.paramPage(), this.paramSize())),
+    shareReplay(1)
   );
 
-  stockLastUpdate: Signal<StockUpdateDto> = toSignal(
-    this.marketDataService.getLastUpdate(),
-    {
-      initialValue: { lastUpdate: '' },
-    }
-  );
-  private stockNamesAndPricesObservable$: Observable<StockDto[]> = toObservable(
-    this.stockLastUpdate
-  ).pipe(
-    tap(() => this.marketDataService.emptyStockDataCache()),
-    switchMap(() => this.marketDataService.getStockData())
-  );
+  stockLastUpdate: Signal<StockUpdateDto> = toSignal(this.marketDataService.getLastUpdate(), {
+    initialValue: { lastUpdate: '' },
+  });
 
-  stockNamesAndPrices: Signal<HoldingNamePriceDTO[]> = toSignal(
-    this.stockNamesAndPricesObservable$.pipe(
+  stockNamesAndPrices: Signal<HoldingNamePriceDto[]> = toSignal(
+    this.marketDataService.getStockData().pipe(
       map((stocks) => {
         if (!stocks) return [];
         return stocks.map(
@@ -127,26 +101,23 @@ export class OrdersComponent {
             ({
               stockName: stock.stockName,
               currentPrice: stock.pricePerShare,
-            } as HoldingNamePriceDTO)
+            } as HoldingNamePriceDto)
         );
       })
     ),
     { initialValue: [] }
   );
 
-  orders: Signal<OrderDTO[]> = toSignal(
-    this.ordersInfo$.pipe(map((info) => info.orders)),
-    { initialValue: [] }
-  );
-  pageNumber: Signal<number> = toSignal(
-    this.ordersInfo$.pipe(map((info) => info.pageNumber)),
-    { initialValue: 1 }
-  );
+  orders: Signal<OrderDto[]> = toSignal(this.ordersInfo$.pipe(map((info) => info.orders)), {
+    initialValue: [],
+  });
+  pageNumber: Signal<number> = toSignal(this.ordersInfo$.pipe(map((info) => info.pageNumber)), {
+    initialValue: 1,
+  });
 
-  totalPages: Signal<number> = toSignal(
-    this.ordersInfo$.pipe(map((info) => info.totalPages)),
-    { initialValue: 1 }
-  );
+  totalPages: Signal<number> = toSignal(this.ordersInfo$.pipe(map((info) => info.totalPages)), {
+    initialValue: 1,
+  });
 
   private readonly fb = inject(FormBuilder);
   protected readonly stocknameCtrl = this.fb.control('', [Validators.required]);
@@ -166,12 +137,9 @@ export class OrdersComponent {
     amount: this.amountCtrl,
   });
 
-  protected readonly selectedStockName = toSignal(
-    this.stocknameCtrl.valueChanges,
-    {
-      initialValue: this.stocknameCtrl.value,
-    }
-  );
+  protected readonly selectedStockName = toSignal(this.stocknameCtrl.valueChanges, {
+    initialValue: this.stocknameCtrl.value,
+  });
 
   protected readonly formChanges = toSignal(this.orderForm.valueChanges, {
     initialValue: this.orderForm.value,
@@ -195,9 +163,7 @@ export class OrdersComponent {
 
     if (!selectedStock) return false;
 
-    return holdings.some(
-      (holding) => holding.stockName === selectedStock && holding.amount > 0
-    );
+    return holdings.some((holding) => holding.stockName === selectedStock && holding.amount > 0);
   });
 
   submitOrder(): void {
@@ -208,7 +174,7 @@ export class OrdersComponent {
 
     this.orderStatus.set('Connecting...');
 
-    const orderPostDTO: OrderPostDTO = {
+    const orderPostDTO: OrderPostDto = {
       stockName: this.stocknameCtrl.value!.toString(),
       type: this.typeCtrl.value!.toString(),
       price: Number(this.priceCtrl.value),
@@ -221,6 +187,7 @@ export class OrdersComponent {
 
     this.ordersService.postOrder(orderPostDTO).subscribe({
       next: () => {
+        this.walletService.emptyWalletCache();
         this.refreshTrigger.update((value) => value + 1);
         this.orderStatus.set('Successfully submitted new order.');
         this.orderForm.reset();
@@ -235,8 +202,7 @@ export class OrdersComponent {
   }
 
   onBlurAmount() {
-    const val =
-      Number(this.amountCtrl.value?.toString().replace(',', '.')) || 0;
+    const val = Number(this.amountCtrl.value?.toString().replace(',', '.')) || 0;
     this.amountCtrl.setValue(val.toFixed(2));
   }
 }

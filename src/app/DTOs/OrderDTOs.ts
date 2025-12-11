@@ -1,4 +1,4 @@
-export interface OrderDTO {
+export interface OrderDto {
   stockName: string;
   date: string;
   type: string;
@@ -7,13 +7,13 @@ export interface OrderDTO {
   total: number;
 }
 
-export interface OrdersPaginatedDTO {
-  orders: OrderDTO[];
+export interface OrdersPaginatedDto {
+  orders: OrderDto[];
   pageNumber: number;
   totalPages: number;
 }
 
-export interface OrderPostDTO {
+export interface OrderPostDto {
   stockName: string;
   type: string;
   price: number;

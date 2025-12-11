@@ -1,4 +1,7 @@
 {
+  "prettier": {
+    "printWidth": 100
+  },
   "name": "virtual-wallet-frontend",
   "version": "0.0.0",
   "scripts": {

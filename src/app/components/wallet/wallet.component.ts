@@ -1,20 +1,14 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-  Signal,
-} from '@angular/core';
+import { Component, computed, effect, inject, signal, Signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { map, Observable, switchMap, tap } from 'rxjs';
+import { map, Observable, shareReplay, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { HoldingSummaryDTO } from '../../DTOs/HoldingDTOs';
-import { TransferDTO, TransferSummaryDTO } from '../../DTOs/TransferDTOs';
-import { WalletSummaryDTO, WalletTotalDTO } from '../../DTOs/WalletDTOs';
-import { WalletService } from '../../services/wallet.service';
+import { HoldingSummaryDto } from '../../DTOs/HoldingDtos';
+import { TransferDto, TransferSummaryDto } from '../../DTOs/TransferDtos';
+import { WalletSummaryDto, WalletTotalDto } from '../../DTOs/WalletDtos';
+import { IWalletService } from '../../interfaces/i-wallet.service';
+import { WALLET_SERVICE_TOKEN } from '../../tokens';
 import { commaToDot } from '../../validators/commatodot.validator';
 
 @Component({
@@ -39,36 +33,30 @@ export class WalletComponent {
     });
     effect(() => {
       const nothing = this.walletTotals();
-      if (this.walletTotals().TotalCash <= 0)
-        this.transferTypes.set(['Deposit']);
+      if (this.walletTotals().TotalCash <= 0) this.transferTypes.set(['Deposit']);
       else this.transferTypes.set(['Deposit', 'Withdrawal']);
     });
   }
 
-  protected readonly walletService = inject(WalletService);
+  private walletService = inject<IWalletService>(WALLET_SERVICE_TOKEN);
+
   protected readonly transferStatus = signal<string>('');
-  protected readonly transferTypes = signal<string[]>([
-    'Deposit',
-    'Withdrawal',
-  ]);
+  protected readonly transferTypes = signal<string[]>(['Deposit', 'Withdrawal']);
   protected readonly refreshTrigger = signal(0);
   protected readonly paramPage = signal(1);
   protected readonly paramSize = signal(5);
-  private wallet$: Observable<WalletSummaryDTO> = toObservable(
-    this.refreshTrigger
-  ).pipe(
-    tap(() => this.walletService.emptyWalletCache()),
-    switchMap(() =>
-      this.walletService.getWallet(this.paramPage(), this.paramSize())
-    )
+
+  private wallet$: Observable<WalletSummaryDto> = toObservable(this.refreshTrigger).pipe(
+    switchMap(() => this.walletService.getWallet(this.paramPage(), this.paramSize())),
+    shareReplay(1)
   );
 
-  transfers: Signal<TransferSummaryDTO[]> = toSignal(
+  transfers: Signal<TransferSummaryDto[]> = toSignal(
     this.wallet$.pipe(map((wallet) => wallet.transferPage.transfers)),
     { initialValue: [] }
   );
 
-  holdings: Signal<HoldingSummaryDTO[]> = toSignal(
+  holdings: Signal<HoldingSummaryDto[]> = toSignal(
     this.wallet$.pipe(map((wallet) => wallet.holdings)),
     { initialValue: [] }
   );
@@ -87,7 +75,7 @@ export class WalletComponent {
     { initialValue: 1 }
   );
 
-  walletTotals: Signal<WalletTotalDTO> = toSignal(
+  walletTotals: Signal<WalletTotalDto> = toSignal(
     this.wallet$.pipe(
       map((walletSummary) => ({
         TotalCash: walletSummary.totalCash,
@@ -102,7 +90,7 @@ export class WalletComponent {
         TotalValue: 0,
         TotalProfit: 0,
         WinLossPct: 0,
-      } as WalletTotalDTO,
+      } as WalletTotalDto,
     }
   );
 
@@ -135,7 +123,7 @@ export class WalletComponent {
 
     this.transferStatus.set('Connecting...');
 
-    const transferDTO: TransferDTO = {
+    const transferDTO: TransferDto = {
       amount: Number(this.amountCtrl.value),
       type: this.typeCtrl.value!.toString(),
     };
@@ -146,6 +134,7 @@ export class WalletComponent {
 
     this.walletService.postTransfer(transferDTO).subscribe({
       next: () => {
+        this.walletService.emptyWalletCache();
         this.refreshTrigger.update((value) => value + 1);
         this.transferStatus.set('Successfully transferred.');
         this.transferForm.reset();
@@ -157,8 +146,7 @@ export class WalletComponent {
   }
 
   onBlurAmount() {
-    const val =
-      Number(this.amountCtrl.value?.toString().replace(',', '.')) || 0;
+    const val = Number(this.amountCtrl.value?.toString().replace(',', '.')) || 0;
     this.amountCtrl.setValue(val.toFixed(2));
   }
 }

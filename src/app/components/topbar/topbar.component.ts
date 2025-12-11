@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { IAuthService } from '../../interfaces/i-auth.service';
+import { AUTH_SERVICE_TOKEN } from '../../tokens';
 
 @Component({
   selector: 'app-topbar',
@@ -9,8 +10,8 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './topbar.component.css',
 })
 export class TopbarComponent {
-  authService = inject(AuthService);
-  router = inject(Router);
+  private authService = inject<IAuthService>(AUTH_SERVICE_TOKEN);
+  private router = inject(Router);
 
   logout(): void {
     this.authService.logout().subscribe({

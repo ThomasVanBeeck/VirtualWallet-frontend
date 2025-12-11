@@ -2,8 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { UserLoginDTO } from '../../DTOs/UserDTOs';
-import { AuthService } from '../../services/auth.service';
+import { UserLoginDto } from '../../DTOs/UserDtos';
+import { IAuthService } from '../../interfaces/i-auth.service';
+import { AUTH_SERVICE_TOKEN } from '../../tokens';
 
 @Component({
   selector: 'app-login',
@@ -12,8 +13,9 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
-  authService = inject(AuthService);
-  router = inject(Router);
+  private authService = inject<IAuthService>(AUTH_SERVICE_TOKEN);
+  private router = inject(Router);
+
   loginStatus = signal<string>('');
 
   private readonly fb = inject(FormBuilder);
@@ -40,7 +42,7 @@ export class LoginComponent {
 
     this.loginStatus.set('Connecting...');
 
-    const userLoginDTO: UserLoginDTO = {
+    const userLoginDTO: UserLoginDto = {
       Username: this.usernameCtrl.value!.toString(),
       Password: this.passwordCtrl.value!.toString(),
     };
@@ -55,8 +57,7 @@ export class LoginComponent {
         this.loginStatus.set('');
       },
       error: (err) => {
-        if (err.status == 401)
-          this.loginStatus.set('Username and/or password incorrect.');
+        if (err.status == 401) this.loginStatus.set('Username and/or password incorrect.');
         else this.loginStatus.set('Login failed.');
       },
     });

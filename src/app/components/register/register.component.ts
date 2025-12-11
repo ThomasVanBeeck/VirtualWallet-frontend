@@ -1,9 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink, RouterModule } from '@angular/router';
-import { UserService } from '../../services/user.service';
+import { RouterLink, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { UserRegisterDTO } from '../../DTOs/UserDTOs';
+import { UserRegisterDto } from '../../DTOs/UserDtos';
+import { IUserService } from '../../interfaces/i-user.service';
+import { USER_SERVICE_TOKEN } from '../../tokens';
 import { validateEquivalent } from '../../validators/equivalent.validator';
 
 @Component({
@@ -13,8 +14,8 @@ import { validateEquivalent } from '../../validators/equivalent.validator';
   styleUrl: './register.component.css',
 })
 export class RegisterComponent {
-  userService = inject(UserService);
-  router = inject(Router);
+  private userService = inject<IUserService>(USER_SERVICE_TOKEN);
+
   registerStatus = signal<string>('');
   isRegistered = false;
 
@@ -68,7 +69,7 @@ export class RegisterComponent {
 
     this.registerStatus.set('Connecting...');
 
-    const userDTO: UserRegisterDTO = {
+    const userDTO: UserRegisterDto = {
       Username: this.usernameCtrl.value!.toString(),
       FirstName: this.firstNameCtrl.value!.toString(),
       LastName: this.lastNameCtrl.value!.toString(),

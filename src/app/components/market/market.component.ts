@@ -1,9 +1,9 @@
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { Component, Signal, inject } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Observable, switchMap, tap } from 'rxjs';
-import { StockDto, StockUpdateDto } from '../../DTOs/StockDTOs';
-import { MarketDataService } from '../../services/market-data.service';
+import { Component, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { StockDto, StockUpdateDto } from '../../DTOs/StockDtos';
+import { IMarketDataService } from '../../interfaces/i-market-data.service';
+import { MARKETDATA_SERVICE_TOKEN } from '../../tokens';
 
 @Component({
   selector: 'app-market',
@@ -12,22 +12,13 @@ import { MarketDataService } from '../../services/market-data.service';
   styleUrl: './market.component.css',
 })
 export class MarketComponent {
-  marketDataService = inject(MarketDataService);
+  private marketDataService = inject<IMarketDataService>(MARKETDATA_SERVICE_TOKEN);
 
-  stockLastUpdate: Signal<StockUpdateDto> = toSignal(
-    this.marketDataService.getLastUpdate(),
-    {
-      initialValue: { lastUpdate: '' },
-    }
-  );
-  private stockDataObservable$: Observable<StockDto[]> = toObservable(
-    this.stockLastUpdate
-  ).pipe(
-    tap(() => this.marketDataService.emptyStockDataCache()),
-    switchMap(() => this.marketDataService.getStockData())
-  );
+  stockLastUpdate: Signal<StockUpdateDto> = toSignal(this.marketDataService.getLastUpdate(), {
+    initialValue: { lastUpdate: '' },
+  });
 
-  stockData: Signal<StockDto[]> = toSignal(this.stockDataObservable$, {
+  stockData: Signal<StockDto[]> = toSignal(this.marketDataService.getStockData(), {
     initialValue: [],
   });
 }
