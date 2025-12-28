@@ -171,7 +171,12 @@ export class OrdersComponent {
   });
 
   submitOrder(): void {
-    if (this.orderForm.invalid) {
+    const rawValue = this.amountCtrl.value?.toString().replace(',', '.') || '0';
+    const numericValue = parseFloat(rawValue);
+
+    this.amountCtrl.setValue(numericValue.toFixed(2), { emitEvent: false });
+
+    if (isNaN(numericValue) || numericValue < 0.01 || this.orderForm.invalid) {
       this.orderForm.markAllAsTouched();
       return;
     }

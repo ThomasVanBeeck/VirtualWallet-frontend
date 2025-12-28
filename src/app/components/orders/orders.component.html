@@ -2,9 +2,7 @@
   <h1 class="title">Orders</h1>
 
   <h2>Place Order</h2>
-  <p class="available-cash">
-    Available Cash: {{ totalCash() | number : "1.2-2" : "en-US" }} $
-  </p>
+  <p class="available-cash">Available Cash: {{ totalCash() | number : "1.2-2" : "en-US" }} $</p>
   <form (ngSubmit)="submitOrder()" [formGroup]="orderForm" class="mainflex">
     <div class="subflex">
       <label class="darktext">Stockname</label>
@@ -42,22 +40,18 @@
       <div>
         <label class="darktext">Price per Share</label>
       </div>
-      <input formControlName="price" />
+      <input formControlName="price" [value]="orderForm.get('price')?.value | number : '1.0-2'" />
     </div>
 
     <div class="subflex">
       <div>
         <label class="darktext">Total</label>
       </div>
-      <input formControlName="total" />
+      <input formControlName="total" [value]="orderForm.get('total')?.value | number : '1.0-2'" />
     </div>
 
     <div class="subflex">
-      <button
-        class="maxwidth-6rem no-margin"
-        type="submit"
-        [disabled]="orderForm.invalid"
-      >
+      <button class="maxwidth-6rem no-margin" type="submit" [disabled]="orderForm.invalid">
         Place Order
       </button>
     </div>
@@ -84,13 +78,9 @@
             {{ order.date | date : "d MMMM yyyy, h:mm a" }}
           </td>
           <td class="align-left">{{ order.type }}</td>
-          <td class="align-right font-bold">
-            {{ order.price | number : "1.2-2" }} $
-          </td>
+          <td class="align-right font-bold">{{ order.price | number : "1.2-2" }} $</td>
           <td class="align-right font-bold">{{ order.amount }}</td>
-          <td class="align-right font-bold">
-            {{ order.total | number : "1.2-2" }} $
-          </td>
+          <td class="align-right font-bold">{{ order.total | number : "1.2-2" }} $</td>
         </tr>
         } }
       </tbody>
@@ -120,8 +110,7 @@
     <span class="darktext">...</span>
     } @if (tp >= 2) {
     <span class="activepage">{{ pageNumber() }}</span>
-    } @if ((tp > 2 && (pageNumber()+1) != totalPages()) && pageNumber() !=
-    totalPages()) {
+    } @if ((tp > 2 && (pageNumber()+1) != totalPages()) && pageNumber() != totalPages()) {
     <span class="darktext">...</span>
     } @if (pageNumber() != totalPages()) {
     <button class="pagebutton" (click)="setPageNumber(tp)">
