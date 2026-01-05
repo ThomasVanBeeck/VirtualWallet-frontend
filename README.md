@@ -3,14 +3,14 @@
 ## Doel van het project
 
 Dit is het frontend gedeelte van het 'VirtualWallet' project.
-De bedoeling is om met virtueel geld te kunnen beleggen.
+De bedoeling is om te beleggen met virtueel geld.
 Dit project is beperkt tot enkele stocks en cryptocurrencies die men kan aankopen/verkopen met virtueel geld.
 Als gebruiker kan je jezelf registreren en vervolgens inloggen. De bedoeling is om virtueel geld op je portefeuille te storten waarmee je aan de slag kan om aandelen te kopen/verkopen.
-Het storten van dit virtueel geld kost uiteraard niks.
+Het storten van dit virtueel geld kost uiteraard nep en kost geen echt geld.
 
 De koersen worden in hun huidige configuratie via een externe API bijgewerkt in de backend.
 Standaard is dit ingesteld op 24u, aangezien het verversen van deze gegevens via de gratis versie van de externe API eerder beperkt is.
-Bij een betaalversie zou men kunnen opteren om dit aan te passen naar bijvoorbeeld 5 minuten per refresh.
+Bij een betaalversie zou men kunnen opteren om dit aan te passen naar bijvoorbeeld 5 minuten per refresh om een echte 'stock exchange' ervaring na te bootsen.
 
 Gebruikte valuta in dit project is Amerikaanse dollar (USD).
 
