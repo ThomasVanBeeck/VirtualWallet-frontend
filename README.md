@@ -1,59 +1,71 @@
-# VirtualWalletFrontend
+# VirtualWallet Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.5.
+## Doel van het project
 
-## Development server
+Dit is het frontend gedeelte van het 'VirtualWallet' project.
+De bedoeling is om met virtueel geld te kunnen beleggen.
+Dit project is beperkt tot enkele stocks en cryptocurrencies die men kan aankopen/verkopen met virtueel geld.
+Als gebruiker kan je jezelf registreren en vervolgens inloggen. De bedoeling is om virtueel geld op je portefeuille te storten waarmee je aan de slag kan om aandelen te kopen/verkopen.
+Het storten van dit virtueel geld kost uiteraard niks.
 
-To start a local development server, run:
+De koersen worden in hun huidige configuratie via een externe API bijgewerkt in de backend.
+Standaard is dit ingesteld op 24u, aangezien het verversen van deze gegevens via de gratis versie van de externe API eerder beperkt is.
+Bij een betaalversie zou men kunnen opteren om dit aan te passen naar bijvoorbeeld 5 minuten per refresh.
 
-```bash
-ng serve
+Gebruikte valuta in dit project is Amerikaanse dollar (USD).
+
+## Setup instructies
+
+- Clone de repository
+- Installeer Node.js indien dit nog niet is gebeurd (minimum v20.11.x vereist)
+- Installeer de node modules met **npm install** (via CLI in project folder)
+- Gebruik het commando **ng serve** om het project lokaal te hosten (http://localhost:4200)
+
+### Mocking enablen/disablen
+
+Wijzig 'mockApi' in het bestand `src/environments/environment.development.ts` naar **true** om mocking te enablen.
+Dit stelt je in staat om het project grotendeels (niet volledig!) te testen zonder dat een backend vereist is.
+
+
+## Structuur
+
+### Componenten
+
+Twee hoofdcomponenten met verschillende layouts:
+
+- Authlayout: gebruiker kan hier inloggen/registreren
+  - Login component: inloggen (gebruiker moet uiteraard eerst geregistreerd zijn)
+  - Register component: registreren (controles op invoervelden van het formulier en checken of username al bestaat)
+- Mainlayout: het platform zelf, enkel bereikbaar indien gebruiker is ingelogd
+  - Market component: weergave van huidige koersen van stocks & crypto
+  - Orders component: overzicht van historiek eigen orders + nieuwe orders invoeren
+  - Wallet component: overzicht van holdings + 'cash' verwijderen/toevoegen
+  - Topbar component: navigatiebalk bovenaan + uitloggen
+
+### Services
+
+De componenten injecteren verschillende services via interfaces.
+Dit maakt het gemakkelijk om te schakelen tussen de echte services en de mock versie van elke service.
+
+Voor de user service is uitzonderlijk een abstracte klasse aangemaakt.
+Hierin staat een validator die door de abstracte klasse zowel in de mock service als gewone service hetzelfde blijft.
+Deze validator maakt gebruik van de usernameExists functie om te controleren of een gebruikersnaam al bestaat of niet.
+De usernameExists functie krijgt dus, afhankelijk van mocking of productie, een andere invulling.
+
+Het injecteren van de services gebeurd via tokens:
+```
+private marketDataService = inject<IMarketDataService>(MARKETDATA_SERVICE_TOKEN);
+
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+Deze tokens staan in `src/app/tokens.ts` en hun invulling: `src/app/app.config.ts`. In `src/app/environments/environment.development.ts` staat de boolean waarde 'mockApi'.
+Afhankelijk van deze waarde kan men gemakkelijk schakelen tussen de service klassen of gemockte service klassen.
+In `src/app/app.config.ts` wordt op deze manier de juiste service bepaald:
+```
+const AuthServiceClass = environment.mockApi ? AuthmockService : AuthService;
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Signals
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Aangezien het werken met signals de modernere, nieuwere manier van werken is, worden ze ook toegepast in dit project.
+Dit project maakt onder andere gebruik van toSignal, toObservable, computed, effect en linkedSignal.

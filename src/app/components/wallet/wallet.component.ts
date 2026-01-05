@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, effect, inject, signal, Signal } from '@angular/core';
+import {Component, computed, effect, inject, linkedSignal, signal, Signal} from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { map, Observable, shareReplay, switchMap } from 'rxjs';
@@ -25,23 +25,23 @@ export class WalletComponent {
         if (environment.mockApi) console.log('refreshing wallet content');
       });
     }
-    effect(() => {
-      const nothing = this.formChanges();
-      if (this.transferForm.dirty) {
-        this.transferStatus.set('');
-      }
-    });
-    effect(() => {
-      const nothing = this.walletTotals();
-      if (this.walletTotals().TotalCash <= 0) this.transferTypes.set(['Deposit']);
-      else this.transferTypes.set(['Deposit', 'Withdrawal']);
-    });
   }
 
   private walletService = inject<IWalletService>(WALLET_SERVICE_TOKEN);
 
-  protected readonly transferStatus = signal<string>('');
-  protected readonly transferTypes = signal<string[]>(['Deposit', 'Withdrawal']);
+  protected readonly transferTypes = linkedSignal({
+    source: () => this.walletTotals().TotalCash,
+    computation: (cash) => cash <= 0 ? ['Deposit'] : ['Deposit', 'Withdrawal']
+  });
+
+  protected readonly transferStatus = linkedSignal({
+    source: () => this.formChanges(),
+    computation: (formVal, previous) => {
+      if (this.transferForm.dirty) return '';
+      return previous?.value ?? '';
+    }
+  });
+
   protected readonly refreshTrigger = signal(0);
   protected readonly paramPage = signal(1);
   protected readonly paramSize = signal(5);
